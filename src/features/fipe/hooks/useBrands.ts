@@ -10,6 +10,9 @@ export const fipeKeys = {
     ['fipe', 'years', vehicleType, brandCode, modelCode] as const,
   price: (vehicleType: VehicleType, brandCode: string, modelCode: string, yearCode: string) =>
     ['fipe', 'price', vehicleType, brandCode, modelCode, yearCode] as const,
+  referenceTables: () => ['brasilapi', 'referenceTables'] as const,
+  historicalPrice: (fipeCode: string, referenceCode: number) =>
+    ['brasilapi', 'historicalPrice', fipeCode, referenceCode] as const,
 }
 
 export function useBrands(vehicleType: VehicleType) {

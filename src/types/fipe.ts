@@ -38,3 +38,29 @@ export interface HistoryEntry {
   fipeCode: string
   referenceMonth: string
 }
+
+export interface BrasilApiReference {
+  codigo: number
+  mes: string
+}
+
+export interface BrasilApiPrice {
+  valor: string
+  marca: string
+  modelo: string
+  anoModelo: number
+  combustivel: string
+  codigoFipe: string
+  mesReferencia: string
+  tipoVeiculo: number
+  siglaCombustivel: string
+  dataConsulta: string
+}
+
+export interface PriceHistoryPoint {
+  month: string
+  monthCode: number
+  value: number
+}
+
+export type PeriodFilter = '6M' | '1A' | '2A' | '3A' | 'Tudo'

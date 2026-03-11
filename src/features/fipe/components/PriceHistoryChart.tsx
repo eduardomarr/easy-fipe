@@ -1,90 +1,114 @@
+import { useState } from 'react'
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
-import type { HistoryEntry } from '@/types/fipe'
+import { Skeleton } from '@/components/ui/skeleton'
+import type { PeriodFilter } from '@/types/fipe'
+import { usePriceHistory } from '../hooks/usePriceHistory'
 
 interface Props {
-  history: HistoryEntry[]
   fipeCode: string
+  modelYear: number
 }
 
-function parsePrice(price: string): number {
-  return parseFloat(price.replace('R$ ', '').replace(/\./g, '').replace(',', '.'))
-}
+const PERIODS: PeriodFilter[] = ['6M', '1A', '2A', '3A', 'Tudo']
 
-export function PriceHistoryChart({ history, fipeCode }: Props) {
-  const filtered = history
-    .filter((h) => h.fipeCode === fipeCode)
-    .sort((a, b) => a.searchedAt.localeCompare(b.searchedAt))
+export function PriceHistoryChart({ fipeCode, modelYear }: Props) {
+  const [period, setPeriod] = useState<PeriodFilter>('1A')
+  const { data, totalMonths, loadedMonths, isLoading } = usePriceHistory(
+    fipeCode,
+    modelYear,
+    period,
+  )
 
-  if (filtered.length < 2) {
-    return (
-      <Card className="border border-border/60">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold">Histórico de preços</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground text-center py-6">
-            Consulte novamente ao longo do tempo para ver o histórico de preços
-          </p>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  const chartData = filtered.map((h) => ({
-    month: h.referenceMonth,
-    value: parsePrice(h.price),
-  }))
+  const showSkeleton = isLoading && data.length === 0
 
   return (
     <Card className="border border-border/60">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold">Histórico de preços</CardTitle>
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="text-sm font-semibold">Histórico de preços</CardTitle>
+          <div className="flex gap-1">
+            {PERIODS.map((p) => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={`rounded-md px-2 py-0.5 text-xs font-medium transition-colors ${
+                  p === period
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted'
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        </div>
+        {isLoading && totalMonths > 0 && (
+          <p className="text-xs text-muted-foreground">
+            Carregando {loadedMonths}/{totalMonths} meses...
+          </p>
+        )}
       </CardHeader>
       <CardContent>
-        <ChartContainer
-          config={{ value: { label: 'Valor FIPE', color: 'var(--chart-1)' } }}
-          className="h-52 w-full"
-        >
-          <AreaChart data={chartData}>
-            <defs>
-              <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--chart-1)" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="var(--chart-1)" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-            <XAxis dataKey="month" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-            <YAxis
-              tick={{ fontSize: 11 }}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(v: number) =>
-                `R$ ${v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`
-              }
-              width={90}
-            />
-            <ChartTooltip
-              content={
-                <ChartTooltipContent
-                  formatter={(v) =>
-                    `R$ ${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-                  }
-                />
-              }
-            />
-            <Area
-              type="monotone"
-              dataKey="value"
-              stroke="var(--chart-1)"
-              strokeWidth={2.5}
-              fill="url(#colorValue)"
-              dot={{ r: 4, fill: 'var(--chart-1)', strokeWidth: 0 }}
-              activeDot={{ r: 6, fill: 'var(--chart-1)' }}
-            />
-          </AreaChart>
-        </ChartContainer>
+        {showSkeleton && <Skeleton className="h-52 w-full rounded-md" />}
+
+        {!showSkeleton && data.length === 0 && (
+          <p className="text-sm text-muted-foreground text-center py-6">
+            Nenhum dado histórico disponível para este veículo
+          </p>
+        )}
+
+        {data.length > 0 && (
+          <ChartContainer
+            config={{ value: { label: 'Valor FIPE', color: 'var(--chart-1)' } }}
+            className="h-52 w-full"
+          >
+            <AreaChart data={data}>
+              <defs>
+                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--chart-1)" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="var(--chart-1)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 11 }}
+                tickLine={false}
+                axisLine={false}
+                interval={Math.max(Math.ceil(data.length / 8) - 1, 0)}
+              />
+              <YAxis
+                tick={{ fontSize: 11 }}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(v: number) =>
+                  `R$ ${v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`
+                }
+                width={90}
+              />
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    formatter={(v) =>
+                      `R$ ${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                    }
+                  />
+                }
+              />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke="var(--chart-1)"
+                strokeWidth={2.5}
+                fill="url(#colorValue)"
+                dot={{ r: 4, fill: 'var(--chart-1)', strokeWidth: 0 }}
+                activeDot={{ r: 6, fill: 'var(--chart-1)' }}
+              />
+            </AreaChart>
+          </ChartContainer>
+        )}
       </CardContent>
     </Card>
   )

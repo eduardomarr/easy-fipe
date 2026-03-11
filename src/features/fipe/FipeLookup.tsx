@@ -106,7 +106,7 @@ export function FipeLookup() {
       {price.data && <FipeResult data={price.data} />}
 
       {price.data && (
-        <PriceHistoryChart history={history} fipeCode={price.data.fipeCode} />
+        <PriceHistoryChart fipeCode={price.data.fipeCode} modelYear={price.data.modelYear} />
       )}
 
       <RecentSearches history={history} onRemove={removeFromHistory} onClear={clearHistory} />

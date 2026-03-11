@@ -8,14 +8,24 @@ interface Props {
   onClear: () => void
 }
 
+const MAX_VISIBLE = 5
+
 export function RecentSearches({ history, onRemove, onClear }: Props) {
   if (history.length === 0) return null
+
+  const visible = history.slice(0, MAX_VISIBLE)
+  const hiddenCount = history.length - MAX_VISIBLE
 
   return (
     <Card className="border border-border/60">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-semibold">Consultas recentes</CardTitle>
+          <CardTitle className="text-sm font-semibold">
+            Consultas recentes
+            {history.length > 1 && (
+              <span className="ml-2 text-xs font-normal text-muted-foreground">({history.length})</span>
+            )}
+          </CardTitle>
           <Button variant="ghost" size="sm" className="text-xs h-auto py-1 text-muted-foreground cursor-pointer" onClick={onClear}>
             Limpar tudo
           </Button>
@@ -23,7 +33,7 @@ export function RecentSearches({ history, onRemove, onClear }: Props) {
       </CardHeader>
       <CardContent>
         <ul className="divide-y divide-border/60">
-          {history.map((entry) => (
+          {visible.map((entry) => (
             <li key={entry.id} className="flex items-center justify-between py-2.5 gap-2">
               <div className="min-w-0 flex items-center gap-3">
                 <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
@@ -52,6 +62,11 @@ export function RecentSearches({ history, onRemove, onClear }: Props) {
             </li>
           ))}
         </ul>
+        {hiddenCount > 0 && (
+          <p className="text-xs text-muted-foreground text-center pt-2">
+            +{hiddenCount} consulta{hiddenCount > 1 ? 's' : ''} anterior{hiddenCount > 1 ? 'es' : ''}
+          </p>
+        )}
       </CardContent>
     </Card>
   )

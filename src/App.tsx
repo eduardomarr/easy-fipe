@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Header } from '@/components/Header'
 import { FipeLookup } from '@/features/fipe/FipeLookup'
 
@@ -21,6 +22,7 @@ export default function App() {
           <FipeLookup />
         </main>
       </div>
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )
 }

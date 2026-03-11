@@ -26,14 +26,19 @@ export function fetchYears(
   return apiFetch<FipeOption[]>(`/${vehicleType}/brands/${brandCode}/models/${modelCode}/years`)
 }
 
-export function fetchPrice(
+interface RawFipePrice extends Omit<FipePrice, 'fipeCode'> {
+  codeFipe: string
+}
+
+export async function fetchPrice(
   vehicleType: VehicleType,
   brandCode: string,
   modelCode: string,
   yearCode: string,
 ): Promise<FipePrice> {
-  return apiFetch<FipePrice>(
+  const raw = await apiFetch<RawFipePrice>(
     `/${vehicleType}/brands/${brandCode}/models/${modelCode}/years/${yearCode}`,
   )
+  return { ...raw, fipeCode: raw.codeFipe }
 }
 
