@@ -58,3 +58,6 @@ All queries use `staleTime: 24h` set globally on the `QueryClient` in `App.tsx` 
 ### Path alias
 
 `@/` maps to `src/` (configured in `vite.config.ts` and `tsconfig.app.json`).
+
+### Building Components
+Never create a component longer than 180 lines. If it exceeds this, split it into smaller components automatically. Always separate UI from logic.

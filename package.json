@@ -8,9 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "npm run build && npm run deploy:sync && npm run deploy:cdn",
-    "deploy:sync": "dotenv -- aws s3 sync dist s3://$S3_BUCKET --delete",
-    "deploy:cdn": "dotenv -- aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths /*"
+    "deploy:prod": "npm run build && npm run deploy:sync && npm run deploy:cdn",
+    "deploy:sync": "dotenv -- sh -c 'aws s3 sync dist s3://$S3_BUCKET --delete'",
+    "deploy:cdn": "dotenv -- sh -c 'aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths \"/*\"'"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
