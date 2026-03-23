@@ -31,7 +31,9 @@ export function YearSelect({ options, value, isLoading, disabled, onChange }: Pr
       disabled={disabled}
     >
       <SelectTrigger className="w-full">
-        <SelectValue placeholder="Selecione o ano" />
+        <SelectValue placeholder="Selecione o ano">
+          {options.find((o) => o.code === value)?.name}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {options.map((opt) => (
