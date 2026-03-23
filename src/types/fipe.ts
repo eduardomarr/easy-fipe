@@ -31,8 +31,11 @@ export interface HistoryEntry {
   id: string
   searchedAt: string
   vehicleType: VehicleType
+  brandCode?: string
   brandName: string
+  modelCode?: string
   modelName: string
+  yearCode?: string
   yearName: string
   price: string
   fipeCode: string

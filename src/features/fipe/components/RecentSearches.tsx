@@ -6,11 +6,12 @@ interface Props {
   history: HistoryEntry[]
   onRemove: (id: string) => void
   onClear: () => void
+  onSelect?: (entry: HistoryEntry) => void
 }
 
 const MAX_VISIBLE = 5
 
-export function RecentSearches({ history, onRemove, onClear }: Props) {
+export function RecentSearches({ history, onRemove, onClear, onSelect }: Props) {
   if (history.length === 0) return null
 
   const visible = history.slice(0, MAX_VISIBLE)
@@ -35,7 +36,10 @@ export function RecentSearches({ history, onRemove, onClear }: Props) {
         <ul className="divide-y divide-border/60">
           {visible.map((entry) => (
             <li key={entry.id} className="flex items-center justify-between py-2.5 gap-2">
-              <div className="min-w-0 flex items-center gap-3">
+              <div
+                className={`min-w-0 flex items-center gap-3 flex-1 ${entry.brandCode ? 'cursor-pointer hover:opacity-80' : 'opacity-60'}`}
+                onClick={() => entry.brandCode && onSelect?.(entry)}
+              >
                 <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                   <span className="text-xs font-bold text-primary">
                     {entry.brandName.charAt(0)}

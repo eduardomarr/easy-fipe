@@ -78,6 +78,10 @@ export function PriceHistoryChart({ fipeCode, modelYear }: Props) {
                 tickLine={false}
                 axisLine={false}
                 interval={Math.max(Math.ceil(data.length / 8) - 1, 0)}
+                tickFormatter={(month: string) => {
+                  const [m, y] = month.split('/')
+                  return `${m.slice(0, 3)}/${y?.slice(2) ?? ''}`
+                }}
               />
               <YAxis
                 tick={{ fontSize: 11 }}
@@ -87,6 +91,10 @@ export function PriceHistoryChart({ fipeCode, modelYear }: Props) {
                   `R$ ${v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`
                 }
                 width={90}
+                domain={[
+                  (dataMin: number) => Math.floor((dataMin * 0.92) / 1000) * 1000,
+                  (dataMax: number) => Math.ceil((dataMax * 1.02) / 1000) * 1000,
+                ]}
               />
               <ChartTooltip
                 content={

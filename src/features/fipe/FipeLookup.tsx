@@ -49,8 +49,11 @@ export function FipeLookup() {
       id: crypto.randomUUID(),
       searchedAt: new Date().toISOString(),
       vehicleType,
+      brandCode: selection.brandCode ?? undefined,
       brandName: selection.brandName ?? '',
+      modelCode: selection.modelCode ?? undefined,
       modelName: selection.modelName ?? '',
+      yearCode: selection.yearCode ?? undefined,
       yearName: selection.yearName ?? '',
       price: price.data.price,
       fipeCode: price.data.fipeCode,
@@ -63,6 +66,14 @@ export function FipeLookup() {
   useEffect(() => {
     addedRef.current = null
   }, [vehicleType, brandCode, modelCode, yearCode])
+
+  const handleSelectHistory = (entry: HistoryEntry) => {
+    if (!entry.brandCode || !entry.modelCode || !entry.yearCode) return
+    setVehicleType(entry.vehicleType)
+    setBrand(entry.brandCode, entry.brandName)
+    setModel(entry.modelCode, entry.modelName)
+    setYear(entry.yearCode, entry.yearName)
+  }
 
   return (
     <div className="space-y-4">
@@ -109,7 +120,7 @@ export function FipeLookup() {
         <PriceHistoryChart fipeCode={price.data.fipeCode} modelYear={price.data.modelYear} />
       )}
 
-      <RecentSearches history={history} onRemove={removeFromHistory} onClear={clearHistory} />
+      <RecentSearches history={history} onRemove={removeFromHistory} onClear={clearHistory} onSelect={handleSelectHistory} />
     </div>
   )
 }

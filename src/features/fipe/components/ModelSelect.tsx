@@ -31,7 +31,9 @@ export function ModelSelect({ options, value, isLoading, disabled, onChange }: P
       disabled={disabled}
     >
       <SelectTrigger className="w-full">
-        <SelectValue placeholder="Selecione o modelo" />
+        <SelectValue placeholder="Selecione o modelo">
+          {options.find((o) => o.code === value)?.name}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {options.map((opt) => (

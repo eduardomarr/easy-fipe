@@ -29,7 +29,9 @@ export function BrandSelect({ options, value, isLoading, onChange }: Props) {
       }}
     >
       <SelectTrigger className="w-full">
-        <SelectValue placeholder="Selecione a marca" />
+        <SelectValue placeholder="Selecione a marca">
+          {options.find((o) => o.code === value)?.name}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {options.map((opt) => (
