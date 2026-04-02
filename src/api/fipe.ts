@@ -1,6 +1,6 @@
 import type { FipeOption, FipePrice, VehicleType } from '@/types/fipe'
 
-const BASE_URL = 'https://fipe.parallelum.com.br/api/v2'
+const BASE_URL = '/api/v2'
 
 async function apiFetch<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`)
