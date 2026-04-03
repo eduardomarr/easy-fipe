@@ -1,10 +1,11 @@
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from '@/components/ui/combobox'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { FipeOption } from '@/types/fipe'
 
@@ -21,27 +22,31 @@ export function ModelSelect({ options, value, isLoading, disabled, onChange }: P
     return <Skeleton className="h-8 w-full rounded-lg" />
   }
 
+  const selected = options.find((o) => o.code === value) ?? null
+
   return (
-    <Select
-      value={value ?? ''}
-      onValueChange={(code) => {
-        const opt = options.find((o) => o.code === code)
-        if (opt) onChange(opt.code, opt.name)
+    <Combobox<FipeOption>
+      value={selected}
+      onValueChange={(item) => {
+        if (item) onChange(item.code, item.name)
       }}
+      itemToStringLabel={(item) => item.name}
+      itemToStringValue={(item) => item.name}
+      isItemEqualToValue={(a, b) => a.code === b.code}
       disabled={disabled}
+      autoHighlight
     >
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Selecione o modelo">
-          {options.find((o) => o.code === value)?.name}
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((opt) => (
-          <SelectItem key={opt.code} value={opt.code}>
-            {opt.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+      <ComboboxInput placeholder="Selecione o modelo" className="w-full" disabled={disabled} showClear={!!value} />
+      <ComboboxContent>
+        <ComboboxList>
+          {options.map((opt) => (
+            <ComboboxItem key={opt.code} value={opt}>
+              {opt.name}
+            </ComboboxItem>
+          ))}
+        </ComboboxList>
+        <ComboboxEmpty>Nenhum modelo encontrado</ComboboxEmpty>
+      </ComboboxContent>
+    </Combobox>
   )
 }

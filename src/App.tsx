@@ -16,11 +16,14 @@ const queryClient = new QueryClient({
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-background">
+      <div className="flex min-h-screen flex-col bg-background">
         <Header />
-        <main className="container mx-auto px-4 py-6 max-w-2xl">
+        <main className="container mx-auto flex-1 px-4 py-6 max-w-2xl">
           <FipeLookup />
         </main>
+        <footer className="py-4 px-4 text-left text-xs text-muted-foreground">
+          v1.0
+        </footer>
       </div>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
