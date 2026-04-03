@@ -2,6 +2,7 @@ import { useQuery, useQueries } from '@tanstack/react-query'
 import { fetchReferenceTables, fetchHistoricalPrice } from '@/api/brasilapi'
 import type { PeriodFilter, PriceHistoryPoint } from '@/types/fipe'
 import { fipeKeys } from './useBrands'
+import { ONE_WEEK } from '@/constants/cachePeriods'
 
 const PERIOD_MONTHS: Record<PeriodFilter, number> = {
   '6M': 6,
@@ -10,8 +11,6 @@ const PERIOD_MONTHS: Record<PeriodFilter, number> = {
   '3A': 36,
   'Tudo': 36,
 }
-
-const ONE_WEEK = 1000 * 60 * 60 * 24 * 7
 
 function parsePrice(valor: string): number {
   return parseFloat(valor.replace('R$ ', '').replace(/\./g, '').replace(',', '.'))
