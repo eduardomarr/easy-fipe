@@ -2,8 +2,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Header } from '@/components/Header'
 import { FipeLookup } from '@/features/fipe/FipeLookup'
-
-const ONE_DAY = 1000 * 60 * 60 * 24
+import { ONE_DAY } from '@/constants/cachePeriods'
+import packageJson from '../package.json'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,7 +22,7 @@ export default function App() {
           <FipeLookup />
         </main>
         <footer className="py-4 px-4 text-left text-xs text-muted-foreground">
-          v1.0
+          {packageJson.version}
         </footer>
       </div>
       <ReactQueryDevtools initialIsOpen={false} />
