@@ -24,6 +24,9 @@ export function FipeLookup() {
     setBrand,
     setModel,
     setYear,
+    clearBrand,
+    clearModel,
+    clearYear,
     addToHistory,
     removeFromHistory,
     clearHistory,
@@ -84,6 +87,7 @@ export function FipeLookup() {
         value={brandCode}
         isLoading={brands.isLoading}
         onChange={setBrand}
+        onClear={clearBrand}
       />
 
       <ModelSelect
@@ -92,6 +96,7 @@ export function FipeLookup() {
         isLoading={models.isLoading}
         disabled={!brandCode}
         onChange={setModel}
+        onClear={clearModel}
       />
 
       <YearSelect
@@ -100,6 +105,7 @@ export function FipeLookup() {
         isLoading={years.isLoading}
         disabled={!modelCode}
         onChange={setYear}
+        onClear={clearYear}
       />
 
       {price.isError && (

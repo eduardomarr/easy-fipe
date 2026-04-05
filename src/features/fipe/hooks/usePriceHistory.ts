@@ -46,6 +46,7 @@ export function usePriceHistory(
           value: parsePrice(match.valor),
         } satisfies PriceHistoryPoint
       },
+      staleTime: ONE_WEEK,
     })),
   })
 
