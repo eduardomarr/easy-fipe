@@ -14,7 +14,7 @@ function gtag(...args: unknown[]) {
 window.gtag = gtag
 
 gtag('js', new Date())
-gtag('config', 'G-CKKPNV8CBZ')
+gtag('config', import.meta.env.VITE_GA_MEASUREMENT_ID)
 
 export function trackEvent(name: string, params?: Record<string, string>) {
   gtag('event', name, params)
