@@ -21,5 +21,6 @@ export function useBrands(vehicleType: VehicleType) {
     queryKey: fipeKeys.brands(vehicleType),
     queryFn: () => fetchBrands(vehicleType),
     staleTime: THREE_DAYS,
+    gcTime: THREE_DAYS,
   })
 }
