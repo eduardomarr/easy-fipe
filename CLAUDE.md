@@ -61,3 +61,9 @@ All queries use `staleTime: 24h` set globally on the `QueryClient` in `App.tsx` 
 
 ### Building Components
 Never create a component longer than 180 lines. If it exceeds this, split it into smaller components automatically. Always separate UI from logic.
+
+### UI Primitives
+Always use shadcn UI components (`src/components/ui/`) for all interactive elements. Never use raw HTML `<input>`, `<select>`, or `<button>` — use the corresponding shadcn component. Shadcn components use `@base-ui/react` (base-nova style), not Radix.
+
+### Analytics
+PostHog (product analytics) and Google Analytics (GA4) are both initialized as side-effect imports in `main.tsx`. PostHog config is in `src/lib/posthog.ts`, GA config is in `src/lib/ga.ts`.

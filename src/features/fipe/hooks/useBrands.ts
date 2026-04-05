@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { fetchBrands } from '@/api/fipe'
+import { THREE_DAYS } from '@/constants/cachePeriods'
 import type { VehicleType } from '@/types/fipe'
 
 export const fipeKeys = {
@@ -19,5 +20,7 @@ export function useBrands(vehicleType: VehicleType) {
   return useQuery({
     queryKey: fipeKeys.brands(vehicleType),
     queryFn: () => fetchBrands(vehicleType),
+    staleTime: THREE_DAYS,
+    gcTime: THREE_DAYS,
   })
 }
