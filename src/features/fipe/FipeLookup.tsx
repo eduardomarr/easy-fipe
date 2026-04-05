@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { track } from '@/lib/analytics'
 import { useFipeStore } from '@/store/fipeStore'
 import type { HistoryEntry } from '@/types/fipe'
 import { useBrands } from './hooks/useBrands'
@@ -48,6 +49,14 @@ export function FipeLookup() {
     if (addedRef.current === key) return
     addedRef.current = key
 
+    track('price_lookup_completed', {
+      fipe_code: price.data.fipeCode,
+      brand: price.data.brand,
+      model: price.data.model,
+      price: price.data.price,
+      reference_month: price.data.referenceMonth,
+    })
+
     const entry: HistoryEntry = {
       id: crypto.randomUUID(),
       searchedAt: new Date().toISOString(),
@@ -69,6 +78,10 @@ export function FipeLookup() {
   useEffect(() => {
     addedRef.current = null
   }, [vehicleType, brandCode, modelCode, yearCode])
+
+  useEffect(() => {
+    if (price.isError) track('price_lookup_error')
+  }, [price.isError])
 
   const handleSelectHistory = (entry: HistoryEntry) => {
     if (!entry.brandCode || !entry.modelCode || !entry.yearCode) return

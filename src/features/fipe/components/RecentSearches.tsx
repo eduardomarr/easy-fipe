@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { track } from '@/lib/analytics'
 import type { HistoryEntry } from '@/types/fipe'
 
 interface Props {
@@ -27,7 +28,7 @@ export function RecentSearches({ history, onRemove, onClear, onSelect }: Props) 
               <span className="ml-2 text-xs font-normal text-muted-foreground">({history.length})</span>
             )}
           </CardTitle>
-          <Button variant="ghost" size="sm" className="text-xs h-auto py-1 text-muted-foreground cursor-pointer" onClick={onClear}>
+          <Button variant="ghost" size="sm" className="text-xs h-auto py-1 text-muted-foreground cursor-pointer" onClick={() => { track('history_cleared'); onClear() }}>
             Limpar tudo
           </Button>
         </div>
@@ -38,7 +39,7 @@ export function RecentSearches({ history, onRemove, onClear, onSelect }: Props) 
             <li key={entry.id} className="flex items-center justify-between py-2.5 gap-2">
               <div
                 className={`min-w-0 flex items-center gap-3 flex-1 ${entry.brandCode ? 'cursor-pointer hover:opacity-80' : 'opacity-60'}`}
-                onClick={() => entry.brandCode && onSelect?.(entry)}
+                onClick={() => { if (!entry.brandCode) return; track('history_entry_selected', { fipe_code: entry.fipeCode, brand_name: entry.brandName, model_name: entry.modelName }); onSelect?.(entry) }}
               >
                 <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                   <span className="text-xs font-bold text-primary">
@@ -59,7 +60,7 @@ export function RecentSearches({ history, onRemove, onClear, onSelect }: Props) 
                 variant="ghost"
                 size="sm"
                 className="text-muted-foreground hover:text-destructive shrink-0 h-auto py-1 px-2 cursor-pointer"
-                onClick={() => onRemove(entry.id)}
+                onClick={() => { track('history_entry_removed'); onRemove(entry.id) }}
               >
                 ✕
               </Button>
