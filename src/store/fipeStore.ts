@@ -10,6 +10,9 @@ interface FipeStore {
   setBrand: (code: string, name: string) => void
   setModel: (code: string, name: string) => void
   setYear: (code: string, name: string) => void
+  clearBrand: () => void
+  clearModel: () => void
+  clearYear: () => void
 
   addToHistory: (entry: HistoryEntry) => void
   removeFromHistory: (id: string) => void
@@ -65,6 +68,35 @@ export const useFipeStore = create<FipeStore>()(
       setYear: (code, name) =>
         set((s) => ({
           selection: { ...s.selection, yearCode: code, yearName: name },
+        })),
+
+      clearBrand: () =>
+        set((s) => ({
+          selection: {
+            ...s.selection,
+            brandCode: null,
+            brandName: null,
+            modelCode: null,
+            modelName: null,
+            yearCode: null,
+            yearName: null,
+          },
+        })),
+
+      clearModel: () =>
+        set((s) => ({
+          selection: {
+            ...s.selection,
+            modelCode: null,
+            modelName: null,
+            yearCode: null,
+            yearName: null,
+          },
+        })),
+
+      clearYear: () =>
+        set((s) => ({
+          selection: { ...s.selection, yearCode: null, yearName: null },
         })),
 
       addToHistory: (entry) =>

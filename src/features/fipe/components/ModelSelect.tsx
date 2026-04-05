@@ -15,9 +15,10 @@ interface Props {
   isLoading: boolean
   disabled: boolean
   onChange: (code: string, name: string) => void
+  onClear: () => void
 }
 
-export function ModelSelect({ options, value, isLoading, disabled, onChange }: Props) {
+export function ModelSelect({ options, value, isLoading, disabled, onChange, onClear }: Props) {
   if (isLoading) {
     return <Skeleton className="h-8 w-full rounded-lg" />
   }
@@ -29,7 +30,9 @@ export function ModelSelect({ options, value, isLoading, disabled, onChange }: P
       value={selected}
       onValueChange={(item) => {
         if (item) onChange(item.code, item.name)
+        else onClear()
       }}
+      items={options}
       itemToStringLabel={(item) => item.name}
       itemToStringValue={(item) => item.name}
       isItemEqualToValue={(a, b) => a.code === b.code}
@@ -39,11 +42,11 @@ export function ModelSelect({ options, value, isLoading, disabled, onChange }: P
       <ComboboxInput placeholder="Selecione o modelo" className="w-full" disabled={disabled} showClear={!!value} />
       <ComboboxContent>
         <ComboboxList>
-          {options.map((opt) => (
-            <ComboboxItem key={opt.code} value={opt}>
-              {opt.name}
+          {(item) => (
+            <ComboboxItem key={item.code} value={item}>
+              {item.name}
             </ComboboxItem>
-          ))}
+          )}
         </ComboboxList>
         <ComboboxEmpty>Nenhum modelo encontrado</ComboboxEmpty>
       </ComboboxContent>

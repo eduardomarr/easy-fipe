@@ -14,9 +14,10 @@ interface Props {
   value: string | null
   isLoading: boolean
   onChange: (code: string, name: string) => void
+  onClear: () => void
 }
 
-export function BrandSelect({ options, value, isLoading, onChange }: Props) {
+export function BrandSelect({ options, value, isLoading, onChange, onClear }: Props) {
   if (isLoading) {
     return <Skeleton className="h-8 w-full rounded-lg" />
   }
@@ -28,7 +29,9 @@ export function BrandSelect({ options, value, isLoading, onChange }: Props) {
       value={selected}
       onValueChange={(item) => {
         if (item) onChange(item.code, item.name)
+        else onClear()
       }}
+      items={options}
       itemToStringLabel={(item) => item.name}
       itemToStringValue={(item) => item.name}
       isItemEqualToValue={(a, b) => a.code === b.code}
@@ -37,11 +40,11 @@ export function BrandSelect({ options, value, isLoading, onChange }: Props) {
       <ComboboxInput placeholder="Selecione a marca" className="w-full" showClear={!!value} />
       <ComboboxContent>
         <ComboboxList>
-          {options.map((opt) => (
-            <ComboboxItem key={opt.code} value={opt}>
-              {opt.name}
+          {(item) => (
+            <ComboboxItem key={item.code} value={item}>
+              {item.name}
             </ComboboxItem>
-          ))}
+          )}
         </ComboboxList>
         <ComboboxEmpty>Nenhuma marca encontrada</ComboboxEmpty>
       </ComboboxContent>
