@@ -1,21 +1,22 @@
 declare global {
   interface Window {
-    dataLayer: unknown[]
+    dataLayer: IArguments[]
     gtag: (...args: unknown[]) => void
   }
 }
 
 window.dataLayer = window.dataLayer || []
 
-function gtag(...args: unknown[]) {
-  window.dataLayer.push(args)
-}
+// Must use `arguments` (not rest params) — gtag.js reads each entry as an Arguments object
+// eslint-disable-next-line prefer-rest-params
+function gtag() { window.dataLayer.push(arguments as unknown as IArguments) }
 
-window.gtag = gtag
+window.gtag = gtag as Window['gtag']
 
-gtag('js', new Date())
-gtag('config', import.meta.env.VITE_GA_MEASUREMENT_ID)
+const g = window.gtag
+g('js', new Date())
+g('config', import.meta.env.VITE_GA_MEASUREMENT_ID)
 
 export function trackEvent(name: string, params?: Record<string, string>) {
-  gtag('event', name, params)
+  g('event', name, params)
 }
