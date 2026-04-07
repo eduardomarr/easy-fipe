@@ -7,7 +7,6 @@ import {
   ComboboxList,
 } from '@/components/ui/combobox'
 import { Skeleton } from '@/components/ui/skeleton'
-import { track } from '@/lib/analytics'
 import type { FipeOption } from '@/types/fipe'
 
 interface Props {
@@ -30,8 +29,8 @@ export function ModelSelect({ options, value, isLoading, disabled, onChange, onC
     <Combobox<FipeOption>
       value={selected}
       onValueChange={(item) => {
-        if (item) { track('model_selected', { model_code: item.code, model_name: item.name }); onChange(item.code, item.name) }
-        else { track('model_cleared'); onClear() }
+        if (item) onChange(item.code, item.name)
+        else onClear()
       }}
       items={options}
       itemToStringLabel={(item) => item.name}

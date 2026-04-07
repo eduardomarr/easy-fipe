@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { track } from '@/lib/analytics'
 import { useFipeStore } from '@/store/fipeStore'
-import type { HistoryEntry } from '@/types/fipe'
+import type { HistoryEntry, VehicleType } from '@/types/fipe'
 import { useBrands } from './hooks/useBrands'
 import { useFipePrice } from './hooks/useFipePrice'
 import { useModels } from './hooks/useModels'
@@ -83,24 +83,70 @@ export function FipeLookup() {
     if (price.isError) track('price_lookup_error')
   }, [price.isError])
 
+  const handleVehicleTypeChange = (type: VehicleType) => {
+    track('vehicle_type_selected', { vehicle_type: type })
+    setVehicleType(type)
+  }
+
+  const handleBrandChange = (code: string, name: string) => {
+    track('brand_selected', { brand_code: code, brand_name: name })
+    setBrand(code, name)
+  }
+
+  const handleBrandClear = () => {
+    track('brand_cleared')
+    clearBrand()
+  }
+
+  const handleModelChange = (code: string, name: string) => {
+    track('model_selected', { model_code: code, model_name: name })
+    setModel(code, name)
+  }
+
+  const handleModelClear = () => {
+    track('model_cleared')
+    clearModel()
+  }
+
+  const handleYearChange = (code: string, name: string) => {
+    track('year_selected', { year_code: code, year_name: name })
+    setYear(code, name)
+  }
+
+  const handleYearClear = () => {
+    track('year_cleared')
+    clearYear()
+  }
+
   const handleSelectHistory = (entry: HistoryEntry) => {
     if (!entry.brandCode || !entry.modelCode || !entry.yearCode) return
+    track('history_entry_selected', { fipe_code: entry.fipeCode, brand_name: entry.brandName, model_name: entry.modelName })
     setVehicleType(entry.vehicleType)
     setBrand(entry.brandCode, entry.brandName)
     setModel(entry.modelCode, entry.modelName)
     setYear(entry.yearCode, entry.yearName)
   }
 
+  const handleRemoveHistory = (id: string) => {
+    track('history_entry_removed')
+    removeFromHistory(id)
+  }
+
+  const handleClearHistory = () => {
+    track('history_cleared')
+    clearHistory()
+  }
+
   return (
     <div className="space-y-4">
-      <VehicleTypeSelector value={vehicleType} onChange={setVehicleType} />
+      <VehicleTypeSelector value={vehicleType} onChange={handleVehicleTypeChange} />
 
       <BrandSelect
         options={brands.data ?? []}
         value={brandCode}
         isLoading={brands.isLoading}
-        onChange={setBrand}
-        onClear={clearBrand}
+        onChange={handleBrandChange}
+        onClear={handleBrandClear}
       />
 
       <ModelSelect
@@ -108,8 +154,8 @@ export function FipeLookup() {
         value={modelCode}
         isLoading={models.isLoading}
         disabled={!brandCode}
-        onChange={setModel}
-        onClear={clearModel}
+        onChange={handleModelChange}
+        onClear={handleModelClear}
       />
 
       <YearSelect
@@ -117,8 +163,8 @@ export function FipeLookup() {
         value={yearCode}
         isLoading={years.isLoading}
         disabled={!modelCode}
-        onChange={setYear}
-        onClear={clearYear}
+        onChange={handleYearChange}
+        onClear={handleYearClear}
       />
 
       {price.isError && (
@@ -139,7 +185,7 @@ export function FipeLookup() {
         <PriceHistoryChart fipeCode={price.data.fipeCode} modelYear={price.data.modelYear} />
       )}
 
-      <RecentSearches history={history} onRemove={removeFromHistory} onClear={clearHistory} onSelect={handleSelectHistory} />
+      <RecentSearches history={history} onRemove={handleRemoveHistory} onClear={handleClearHistory} onSelect={handleSelectHistory} />
     </div>
   )
 }

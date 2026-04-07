@@ -7,7 +7,6 @@ import {
   ComboboxList,
 } from '@/components/ui/combobox'
 import { Skeleton } from '@/components/ui/skeleton'
-import { track } from '@/lib/analytics'
 import type { FipeOption } from '@/types/fipe'
 
 interface Props {
@@ -30,8 +29,8 @@ export function YearSelect({ options, value, isLoading, disabled, onChange, onCl
     <Combobox<FipeOption>
       value={selected}
       onValueChange={(item) => {
-        if (item) { track('year_selected', { year_code: item.code, year_name: item.name }); onChange(item.code, item.name) }
-        else { track('year_cleared'); onClear() }
+        if (item) onChange(item.code, item.name)
+        else onClear()
       }}
       items={options}
       itemToStringLabel={(item) => item.name}

@@ -7,7 +7,6 @@ import {
   ComboboxList,
 } from '@/components/ui/combobox'
 import { Skeleton } from '@/components/ui/skeleton'
-import { track } from '@/lib/analytics'
 import type { FipeOption } from '@/types/fipe'
 
 interface Props {
@@ -29,8 +28,8 @@ export function BrandSelect({ options, value, isLoading, onChange, onClear }: Pr
     <Combobox<FipeOption>
       value={selected}
       onValueChange={(item) => {
-        if (item) { track('brand_selected', { brand_code: item.code, brand_name: item.name }); onChange(item.code, item.name) }
-        else { track('brand_cleared'); onClear() }
+        if (item) onChange(item.code, item.name)
+        else onClear()
       }}
       items={options}
       itemToStringLabel={(item) => item.name}
