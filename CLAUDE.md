@@ -67,3 +67,6 @@ Always use shadcn UI components (`src/components/ui/`) for all interactive eleme
 
 ### Analytics
 PostHog (product analytics) and Google Analytics (GA4) are both initialized as side-effect imports in `main.tsx`. PostHog config is in `src/lib/posthog.ts`, GA config is in `src/lib/ga.ts`.
+
+### Event Handlers
+Never call multiple functions inline in a JSX event handler (e.g. `onClick={() => { track(...); onClear() }}`). Instead, wrap them in a single named handler function. For `track()` calls specifically, include them inside the callback that owns the action — not alongside it in the JSX.

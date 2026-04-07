@@ -1,10 +1,12 @@
 import type { FipeOption, FipePrice, VehicleType } from '@/types/fipe'
+import { track } from '@/lib/analytics'
 
 const BASE_URL = '/api/v2'
 
 async function apiFetch<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`)
   if (!res.ok) {
+    track('api_error', { path, status: String(res.status), status_text: res.statusText })
     throw new Error(`FIPE API error ${res.status}: ${res.statusText} (${path})`)
   }
   return res.json() as Promise<T>
