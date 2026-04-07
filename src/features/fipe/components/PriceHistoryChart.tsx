@@ -3,6 +3,7 @@ import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Skeleton } from '@/components/ui/skeleton'
+import { track } from '@/lib/analytics'
 import type { PeriodFilter } from '@/types/fipe'
 import { usePriceHistory } from '../hooks/usePriceHistory'
 
@@ -21,6 +22,11 @@ export function PriceHistoryChart({ fipeCode, modelYear }: Props) {
     period,
   )
 
+  const handlePeriodChange = (p: PeriodFilter) => {
+    track('price_history_period_changed', { period: p })
+    setPeriod(p)
+  }
+
   const showSkeleton = isLoading && data.length === 0
 
   return (
@@ -32,7 +38,7 @@ export function PriceHistoryChart({ fipeCode, modelYear }: Props) {
             {PERIODS.map((p) => (
               <button
                 key={p}
-                onClick={() => setPeriod(p)}
+                onClick={() => handlePeriodChange(p)}
                 className={`rounded-md px-2 py-0.5 text-xs font-medium transition-colors ${
                   p === period
                     ? 'bg-primary text-primary-foreground'
