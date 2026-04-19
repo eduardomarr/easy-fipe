@@ -1,12 +1,39 @@
+import { Moon, Sun } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { useTheme } from '@/hooks/useTheme'
+
 export function Header() {
+  const { theme, toggleTheme } = useTheme()
+
+  function handleToggleTheme() {
+    toggleTheme()
+  }
+
   return (
-    <header className="border-b border-red-950/30 bg-red-800 py-5">
-      <div className="container mx-auto px-4 max-w-2xl">
-        <div className="flex items-center gap-2">
-          <div className="size-8 rounded-lg bg-white/20 flex items-center justify-center text-white font-black text-sm">F</div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Fipe Fácil</h1>
+    <header className="relative overflow-hidden bg-gradient-to-br from-primary to-primary/70 text-white">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_90%_120%,rgba(255,255,255,0.18),transparent_45%),radial-gradient(circle_at_10%_-20%,rgba(255,255,255,0.14),transparent_50%)]"
+      />
+      <div className="relative container mx-auto px-5 max-w-2xl py-5">
+        <div className="flex items-center gap-3">
+          <div className="size-10 rounded-xl bg-white/15 border border-white/20 backdrop-blur-sm flex items-center justify-center">
+            <span className="font-black text-base">F</span>
+          </div>
+          <div>
+            <h1 className="text-lg font-bold tracking-tight">Fipe Fácil</h1>
+            <p className="text-[11px] text-white/75 -mt-0.5">Consulta de preços FIPE</p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-auto rounded-full bg-white/12 border border-white/20 text-white hover:bg-white/20 hover:text-white"
+            onClick={handleToggleTheme}
+            aria-label="Alternar tema"
+          >
+            {theme === 'light' ? <Moon className="size-4" /> : <Sun className="size-4" />}
+          </Button>
         </div>
-        <p className="text-sm text-red-200 mt-0.5 ml-10">Consulte o valor FIPE do seu veículo</p>
       </div>
     </header>
   )
