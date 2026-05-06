@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -16,7 +17,7 @@ const PERIODS: PeriodFilter[] = ['6M', '1A', '2A', '3A', 'Tudo']
 
 export function PriceHistoryChart({ fipeCode, modelYear }: Props) {
   const [period, setPeriod] = useState<PeriodFilter>('1A')
-  const { data, totalMonths, loadedMonths, isLoading } = usePriceHistory(
+  const { data, totalMonths, loadedMonths, isLoading, isError, refetch } = usePriceHistory(
     fipeCode,
     modelYear,
     period,
@@ -27,26 +28,29 @@ export function PriceHistoryChart({ fipeCode, modelYear }: Props) {
     setPeriod(p)
   }
 
+  const handleRetry = () => {
+    track('price_history_retry_clicked', { period })
+    refetch()
+  }
+
   const showSkeleton = isLoading && data.length === 0
 
   return (
-    <Card className="border border-border/60">
+    <Card className="border-border/50">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between gap-2">
-          <CardTitle className="text-sm font-semibold">Histórico de preços</CardTitle>
+          <CardTitle className="text-sm font-semibold">Historico de precos</CardTitle>
           <div className="flex gap-1">
             {PERIODS.map((p) => (
-              <button
+              <Button
                 key={p}
+                variant={p === period ? 'default' : 'ghost'}
+                size="xs"
                 onClick={() => handlePeriodChange(p)}
-                className={`rounded-md px-2 py-0.5 text-xs font-medium transition-colors ${
-                  p === period
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted'
-                }`}
+                className={p !== period ? 'text-muted-foreground' : ''}
               >
                 {p}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -59,13 +63,24 @@ export function PriceHistoryChart({ fipeCode, modelYear }: Props) {
       <CardContent>
         {showSkeleton && <Skeleton className="h-52 w-full rounded-md" />}
 
-        {!showSkeleton && data.length === 0 && (
+        {!showSkeleton && isError && (
+          <div className="flex flex-col items-center gap-2 py-6">
+            <p className="text-sm text-muted-foreground text-center">
+              Nao foi possivel carregar o historico. Tente novamente.
+            </p>
+            <Button variant="outline" size="sm" onClick={handleRetry}>
+              Tentar novamente
+            </Button>
+          </div>
+        )}
+
+        {!showSkeleton && !isError && data.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-6">
-            Nenhum dado histórico disponível para este veículo
+            Nenhum dado historico disponivel para este veiculo
           </p>
         )}
 
-        {data.length > 0 && (
+        {!isError && data.length > 0 && (
           <ChartContainer
             config={{ value: { label: 'Valor FIPE', color: 'var(--chart-1)' } }}
             className="h-52 w-full"

@@ -5,13 +5,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev        # start dev server (Vite HMR)
-npm run build      # tsc -b && vite build  (type-check + bundle)
-npm run lint       # eslint
-npm run preview    # preview production build locally
+yarn dev        # start dev server (Vite HMR)
+yarn build      # tsc -b && vite build  (type-check + bundle)
+yarn lint       # eslint
+yarn preview    # preview production build locally
 ```
 
-There are no tests. `npm run build` is the validation step — it must pass cleanly before finishing any task.
+There are no tests. `yarn build` is the validation step — it must pass cleanly before finishing any task.
 
 ## TypeScript Constraints
 
@@ -37,13 +37,15 @@ Zustand store (`src/store/fipeStore.ts`):
 - `selection` — current brand/model/year codes and names; **ephemeral** (not persisted)
 - `history: HistoryEntry[]` — accumulated past results; **persisted** to localStorage
 
-### API layer (`src/api/fipe.ts`)
+### API layer
 
-Base URL: `https://fipe.parallelum.com.br/api/v2`
+The app uses **two** upstream APIs, both proxied to avoid CORS and direct-browser 403s:
+- `/api/v2/*` → `fipe.parallelum.com.br/api/v2/*` (brands, models, years, current price)
+- `/api/brasilapi/*` → `brasilapi.com.br/api/*` (reference tables + historical prices used by `PriceHistoryChart`)
 
-Key limitation: `?reference=CODE` for historical prices is a **paid feature**. The free tier only returns the current month. Historical chart data is accumulated locally from repeated searches over time.
+In dev, proxying is handled by Vite (`vite.config.ts`). In production, it's handled by CloudFront (two additional origins + a behavior per path pattern). Never call these upstream hosts directly from the browser — they return 403 when the request comes from a non-allowlisted origin.
 
-Note: BrasilAPI (`brasilapi.com.br/api/fipe`) is a free alternative with no documented rate limits that supports `?tabela_referencia=CODE` for historical lookups (not yet integrated).
+Key limitation: Parallelum's `?reference=CODE` for historical prices is a **paid feature**. The free tier only returns the current month. BrasilAPI supports `?tabela_referencia=CODE` for full history — that is what `usePriceHistory.ts` uses via `src/api/brasilapi.ts`.
 
 ### Styling
 

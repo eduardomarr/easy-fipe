@@ -12,6 +12,11 @@ export default defineConfig({
         target: 'https://fipe.parallelum.com.br',
         changeOrigin: true,
       },
+      '/api/brasilapi': {
+        target: 'https://brasilapi.com.br',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/brasilapi/, '/api'),
+      },
     },
   },
 })

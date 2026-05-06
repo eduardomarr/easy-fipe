@@ -18,10 +18,10 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <div className="flex min-h-screen flex-col bg-background">
         <Header />
-        <main className="container mx-auto flex-1 px-4 py-6 max-w-2xl">
+        <main className="container mx-auto flex-1 px-5 py-8 max-w-2xl">
           <FipeLookup />
         </main>
-        <footer className="py-4 px-4 text-left text-xs text-muted-foreground">
+        <footer className="py-4 px-5 text-left text-[10px] text-muted-foreground/40 select-none">
           {packageJson.version}
         </footer>
       </div>

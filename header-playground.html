@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FIPE Header Playground</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ui-bg: #0b0b0f;
+    --ui-panel: #14141a;
+    --ui-border: #26262f;
+    --ui-text: #e8e8ee;
+    --ui-muted: #8a8a96;
+    --ui-accent: #ff5a5f;
+    --ui-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    /* App (preview) theme tokens */
+    --bg: oklch(0.14 0.005 60);
+    --fg: oklch(0.96 0.005 60);
+    --muted: oklch(0.60 0.008 60);
+    --border: oklch(0.22 0.008 60);
+    --surface: oklch(0.18 0.008 60);
+    --primary: oklch(0.62 0.23 27);
+    --primary-fg: oklch(0.98 0 0);
+  }
+
+  .light-preview {
+    --bg: oklch(0.98 0.002 70);
+    --fg: oklch(0.15 0.005 60);
+    --muted: oklch(0.48 0.01 60);
+    --border: oklch(0.88 0.005 70);
+    --surface: oklch(1 0 0);
+    --primary: oklch(0.52 0.22 27);
+    --primary-fg: oklch(0.98 0 0);
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--ui-bg);
+    color: var(--ui-text);
+    font-size: 14px;
+  }
+
+  .app {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    height: 100vh;
+  }
+
+  /* ---- Controls ---- */
+  .controls {
+    border-right: 1px solid var(--ui-border);
+    padding: 20px;
+    overflow-y: auto;
+    background: var(--ui-panel);
+  }
+  .controls h1 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .controls .sub {
+    color: var(--ui-muted);
+    font-size: 12px;
+    margin-bottom: 20px;
+  }
+  .group { margin-bottom: 20px; }
+  .group-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ui-muted);
+    margin-bottom: 10px;
+  }
+  .segmented {
+    display: grid;
+    grid-auto-columns: 1fr;
+    grid-auto-flow: column;
+    gap: 4px;
+    background: var(--ui-bg);
+    border: 1px solid var(--ui-border);
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .segmented button {
+    all: unset;
+    text-align: center;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--ui-muted);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .segmented button:hover { color: var(--ui-text); }
+  .segmented button[aria-pressed="true"] {
+    background: var(--ui-accent);
+    color: #fff;
+  }
+
+  .variants {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .variant-card {
+    all: unset;
+    cursor: pointer;
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid var(--ui-border);
+    border-radius: 8px;
+    transition: border-color .15s, background .15s;
+  }
+  .variant-card:hover {
+    border-color: var(--ui-accent);
+    background: rgba(255, 90, 95, 0.06);
+  }
+  .variant-card[aria-pressed="true"] {
+    border-color: var(--ui-accent);
+    background: rgba(255, 90, 95, 0.1);
+  }
+  .variant-card .name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ui-text);
+    margin-bottom: 2px;
+  }
+  .variant-card .desc {
+    font-size: 10.5px;
+    color: var(--ui-muted);
+    line-height: 1.3;
+  }
+
+  .toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--ui-bg);
+    border: 1px solid var(--ui-border);
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+  .toggle label { font-size: 12px; cursor: pointer; }
+  .toggle input { accent-color: var(--ui-accent); width: 16px; height: 16px; }
+
+  /* ---- Preview ---- */
+  .preview-wrap {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    overflow: hidden;
+  }
+
+  .preview {
+    overflow: auto;
+    padding: 28px;
+    background: var(--bg);
+    transition: background .25s;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .mock-browser {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px -30px rgba(0,0,0,0.5);
+  }
+
+  .mock-browser .dots {
+    display: flex;
+    gap: 6px;
+    padding: 10px 14px;
+    background: color-mix(in oklab, var(--surface), transparent 40%);
+    border-bottom: 1px solid var(--border);
+  }
+  .mock-browser .dots span {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--border);
+  }
+
+  /* ==================================================
+     HEADER VARIANTS
+     ================================================== */
+
+  /* --- Shared helpers for headers --- */
+  .h-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    width: 100%;
+  }
+
+  .logo-dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--primary);
+    color: var(--primary-fg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 14px;
+    box-shadow: 0 6px 16px -6px color-mix(in oklab, var(--primary), transparent 40%);
+  }
+
+  .logo-mono {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    color: var(--fg);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 14px;
+    background: var(--surface);
+  }
+
+  .brand-title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+  }
+  .brand-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: -2px;
+  }
+
+  .icon-btn {
+    width: 34px; height: 34px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .icon-btn:hover {
+    background: color-mix(in oklab, var(--fg), transparent 92%);
+    color: var(--fg);
+  }
+
+  .pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--fg);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  .pill-btn:hover {
+    background: color-mix(in oklab, var(--fg), transparent 93%);
+  }
+
+  .kbd {
+    font-family: var(--ui-mono);
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    background: color-mix(in oklab, var(--surface), transparent 50%);
+  }
+
+  /* -------- 1) Minimal Line -------- */
+  .header-minimal {
+    border-bottom: 1px solid var(--border);
+  }
+  .header-minimal .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 62px;
+  }
+  .header-minimal .brand {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .header-minimal .spacer { flex: 1; }
+
+  /* -------- 2) Gradient Accent (current evolution) -------- */
+  .header-gradient {
+    border-bottom: 1px solid color-mix(in oklab, var(--border), transparent 40%);
+    background:
+      radial-gradient(ellipse 500px 140px at 50% -40px, color-mix(in oklab, var(--primary), transparent 70%), transparent 70%);
+    position: relative;
+  }
+  .header-gradient::before {
+    content: '';
+    position: absolute; left: 0; right: 0; top: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  }
+  .header-gradient .row {
+    display: flex; align-items: center; gap: 12px; height: 72px;
+  }
+  .header-gradient .brand { display: flex; align-items: center; gap: 12px; }
+  .header-gradient .spacer { flex: 1; }
+
+  /* -------- 3) Glass Floating -------- */
+  .header-glass-wrap {
+    padding: 16px 24px 0;
+  }
+  .header-glass {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: color-mix(in oklab, var(--surface), transparent 25%);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid color-mix(in oklab, var(--border), transparent 30%);
+    border-radius: 16px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 10px 40px -20px rgba(0,0,0,0.35);
+  }
+  .header-glass .brand { display: flex; align-items: center; gap: 10px; }
+  .header-glass .spacer { flex: 1; }
+
+  /* -------- 4) Centered Editorial -------- */
+  .header-editorial {
+    border-bottom: 1px solid var(--border);
+    padding: 32px 24px 20px;
+    text-align: center;
+    position: relative;
+  }
+  .header-editorial .eyebrow {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  .header-editorial h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+  }
+  .header-editorial .actions {
+    position: absolute;
+    top: 16px; right: 16px;
+    display: flex; gap: 6px;
+  }
+
+  /* -------- 5) Split Nav -------- */
+  .header-split {
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .header-split .row {
+    display: flex; align-items: center; gap: 24px; height: 60px;
+  }
+  .header-split .brand { display: flex; align-items: center; gap: 10px; }
+  .header-split nav {
+    display: flex; gap: 4px;
+    padding: 3px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+  .header-split nav a {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .header-split nav a.active {
+    background: var(--fg);
+    color: var(--bg);
+  }
+  .header-split .spacer { flex: 1; }
+  .header-split .actions { display: flex; gap: 6px; align-items: center; }
+
+  /* -------- 6) Bold Statement -------- */
+  .header-bold {
+    background: linear-gradient(135deg,
+      color-mix(in oklab, var(--primary), black 20%) 0%,
+      color-mix(in oklab, var(--primary), black 45%) 100%);
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .header-bold::after {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 90% 120%, rgba(255,255,255,0.15), transparent 40%),
+      radial-gradient(circle at 10% -20%, rgba(255,255,255,0.12), transparent 50%);
+    pointer-events: none;
+  }
+  .header-bold .row {
+    position: relative;
+    display: flex; align-items: center; gap: 14px; height: 78px;
+  }
+  .header-bold .logo-dot {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    backdrop-filter: blur(10px);
+    box-shadow: none;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .header-bold .brand { display: flex; align-items: center; gap: 12px; }
+  .header-bold .brand-title { color: white; font-size: 16px; }
+  .header-bold .brand-sub { color: rgba(255,255,255,0.75); }
+  .header-bold .spacer { flex: 1; }
+  .header-bold .icon-btn { color: rgba(255,255,255,0.8); }
+  .header-bold .icon-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+  .header-bold .pill-btn {
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.2);
+    color: white;
+  }
+
+  /* -------- 7) Command Bar -------- */
+  .header-cmd {
+    border-bottom: 1px solid var(--border);
+  }
+  .header-cmd .row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 16px;
+    height: 64px;
+  }
+  .header-cmd .brand { display: flex; align-items: center; gap: 10px; }
+  .header-cmd .search {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 14px;
+    background: color-mix(in oklab, var(--surface), transparent 40%);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: 13px;
+    max-width: 440px;
+    margin: 0 auto;
+    width: 100%;
+    cursor: text;
+    transition: border-color .15s, background .15s;
+  }
+  .header-cmd .search:hover {
+    border-color: color-mix(in oklab, var(--primary), transparent 60%);
+    background: var(--surface);
+  }
+  .header-cmd .search .spacer { flex: 1; }
+  .header-cmd .actions { display: flex; gap: 4px; }
+
+  /* -------- 8) Badge Header -------- */
+  .header-badge {
+    border-bottom: 1px solid var(--border);
+  }
+  .header-badge .row {
+    display: flex; align-items: center; gap: 12px; height: 64px;
+  }
+  .header-badge .brand { display: flex; align-items: center; gap: 12px; }
+  .header-badge .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    background: color-mix(in oklab, var(--primary), transparent 85%);
+    color: var(--primary);
+    border: 1px solid color-mix(in oklab, var(--primary), transparent 70%);
+  }
+  .header-badge .chip::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 6px var(--primary);
+  }
+  .header-badge .spacer { flex: 1; }
+
+  /* ---- Body filler to show header in context ---- */
+  .page-body {
+    padding: 40px 24px 60px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .page-body h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+    margin-bottom: 8px;
+  }
+  .page-body p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* ---- Output panel ---- */
+  .output {
+    border-top: 1px solid var(--ui-border);
+    padding: 14px 20px;
+    background: var(--ui-panel);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 8px;
+    max-height: 260px;
+  }
+  .output-head {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .output-head h2 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ui-muted);
+  }
+  .copy-btn {
+    all: unset;
+    cursor: pointer;
+    padding: 6px 12px;
+    background: var(--ui-accent);
+    color: #fff;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: filter .15s;
+  }
+  .copy-btn:hover { filter: brightness(1.08); }
+  .output pre {
+    background: var(--ui-bg);
+    border: 1px solid var(--ui-border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: var(--ui-mono);
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--ui-text);
+    overflow: auto;
+    white-space: pre-wrap;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="controls">
+    <h1>Header Studio</h1>
+    <p class="sub">Explore header variants for Fipe Fácil. Pick one and copy the design direction.</p>
+
+    <div class="group">
+      <div class="group-label">Variant</div>
+      <div class="variants" id="variants">
+        <button class="variant-card" data-val="minimal">
+          <div class="name">Minimal Line</div>
+          <div class="desc">Thin border, compact brand</div>
+        </button>
+        <button class="variant-card" data-val="gradient">
+          <div class="name">Gradient Accent</div>
+          <div class="desc">Soft halo + top stripe</div>
+        </button>
+        <button class="variant-card" data-val="glass">
+          <div class="name">Glass Float</div>
+          <div class="desc">Blurred pill, detached</div>
+        </button>
+        <button class="variant-card" data-val="editorial">
+          <div class="name">Editorial</div>
+          <div class="desc">Centered serif title</div>
+        </button>
+        <button class="variant-card" data-val="split">
+          <div class="name">Split Nav</div>
+          <div class="desc">Brand + pill navigation</div>
+        </button>
+        <button class="variant-card" data-val="bold">
+          <div class="name">Bold Statement</div>
+          <div class="desc">Primary-tinted, high presence</div>
+        </button>
+        <button class="variant-card" data-val="cmd">
+          <div class="name">Command Bar</div>
+          <div class="desc">Search-first layout</div>
+        </button>
+        <button class="variant-card" data-val="badge">
+          <div class="name">Live Badge</div>
+          <div class="desc">Tagline replaced by status chip</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-label">Mode</div>
+      <div class="segmented" id="mode-seg">
+        <button data-val="dark">Dark</button>
+        <button data-val="light">Light</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-label">Options</div>
+      <div class="toggle">
+        <label for="opt-icon">Show secondary action</label>
+        <input type="checkbox" id="opt-icon" checked />
+      </div>
+      <div class="toggle">
+        <label for="opt-mono">Monochrome logo</label>
+        <input type="checkbox" id="opt-mono" />
+      </div>
+    </div>
+  </aside>
+
+  <section class="preview-wrap">
+    <div class="preview" id="preview">
+      <div class="mock-browser">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div id="header-slot"></div>
+        <div class="page-body">
+          <h2>Consulta de preços FIPE</h2>
+          <p>Selecione o tipo de veículo, marca, modelo e ano para consultar o valor médio de mercado conforme a tabela FIPE.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="output">
+      <div class="output-head">
+        <h2>Design direction</h2>
+        <button class="copy-btn" id="copy">Copy prompt</button>
+      </div>
+      <pre id="prompt"></pre>
+    </div>
+  </section>
+</div>
+
+<script>
+const DEFAULTS = {
+  variant: 'gradient',
+  mode: 'dark',
+  secondary: true,
+  mono: false,
+};
+const state = { ...DEFAULTS };
+
+/* ---- Icons (inline SVG) ---- */
+const ICON = {
+  moon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+  sun: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>`,
+  search: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
+  clock: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`,
+  menu: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>`,
+};
+
+function themeIcon() {
+  return state.mode === 'dark' ? ICON.sun : ICON.moon;
+}
+
+function logoHTML() {
+  const cls = state.mono ? 'logo-mono' : 'logo-dot';
+  return `<div class="${cls}">F</div>`;
+}
+
+function brandBlock(sub = 'Consulta de preços FIPE') {
+  return `
+    ${logoHTML()}
+    <div>
+      <div class="brand-title">Fipe Fácil</div>
+      <div class="brand-sub">${sub}</div>
+    </div>`;
+}
+
+/* ---- Header renderers ---- */
+const RENDERERS = {
+  minimal: () => `
+    <header class="header-minimal">
+      <div class="h-container">
+        <div class="row">
+          <div class="brand">${brandBlock()}</div>
+          <div class="spacer"></div>
+          ${state.secondary ? `<button class="icon-btn" title="Histórico">${ICON.clock}</button>` : ''}
+          <button class="icon-btn" title="Tema">${themeIcon()}</button>
+        </div>
+      </div>
+    </header>`,
+
+  gradient: () => `
+    <header class="header-gradient">
+      <div class="h-container">
+        <div class="row">
+          <div class="brand">${brandBlock()}</div>
+          <div class="spacer"></div>
+          ${state.secondary ? `<button class="pill-btn">${ICON.clock}<span>Histórico</span></button>` : ''}
+          <button class="icon-btn" title="Tema">${themeIcon()}</button>
+        </div>
+      </div>
+    </header>`,
+
+  glass: () => `
+    <div class="header-glass-wrap">
+      <header class="header-glass">
+        <div class="brand">${brandBlock()}</div>
+        <div class="spacer"></div>
+        ${state.secondary ? `<button class="icon-btn" title="Histórico">${ICON.clock}</button>` : ''}
+        <button class="icon-btn" title="Tema">${themeIcon()}</button>
+      </header>
+    </div>`,
+
+  editorial: () => `
+    <header class="header-editorial">
+      <div class="actions">
+        ${state.secondary ? `<button class="icon-btn" title="Histórico">${ICON.clock}</button>` : ''}
+        <button class="icon-btn" title="Tema">${themeIcon()}</button>
+      </div>
+      <div class="eyebrow">Tabela FIPE · 2026</div>
+      <h1>Fipe Fácil</h1>
+    </header>`,
+
+  split: () => `
+    <header class="header-split">
+      <div class="h-container">
+        <div class="row">
+          <div class="brand">${brandBlock('')}</div>
+          <nav>
+            <a href="#" class="active">Consulta</a>
+            <a href="#">Histórico</a>
+            <a href="#">Gráfico</a>
+          </nav>
+          <div class="spacer"></div>
+          <div class="actions">
+            ${state.secondary ? `<button class="pill-btn">Salvos <span class="kbd">⌘S</span></button>` : ''}
+            <button class="icon-btn" title="Tema">${themeIcon()}</button>
+          </div>
+        </div>
+      </div>
+    </header>`,
+
+  bold: () => `
+    <header class="header-bold">
+      <div class="h-container">
+        <div class="row">
+          <div class="brand">${logoHTML()}
+            <div>
+              <div class="brand-title">Fipe Fácil</div>
+              <div class="brand-sub">Valores oficiais da tabela FIPE</div>
+            </div>
+          </div>
+          <div class="spacer"></div>
+          ${state.secondary ? `<button class="pill-btn">${ICON.clock}<span>Histórico</span></button>` : ''}
+          <button class="icon-btn" title="Tema">${themeIcon()}</button>
+        </div>
+      </div>
+    </header>`,
+
+  cmd: () => `
+    <header class="header-cmd">
+      <div class="h-container">
+        <div class="row">
+          <div class="brand">${brandBlock('')}</div>
+          <div class="search" tabindex="0">
+            ${ICON.search}
+            <span>Buscar marca, modelo ou código FIPE…</span>
+            <div class="spacer"></div>
+            <span class="kbd">⌘K</span>
+          </div>
+          <div class="actions">
+            ${state.secondary ? `<button class="icon-btn" title="Histórico">${ICON.clock}</button>` : ''}
+            <button class="icon-btn" title="Tema">${themeIcon()}</button>
+          </div>
+        </div>
+      </div>
+    </header>`,
+
+  badge: () => `
+    <header class="header-badge">
+      <div class="h-container">
+        <div class="row">
+          <div class="brand">
+            ${logoHTML()}
+            <div>
+              <div class="brand-title">Fipe Fácil</div>
+              <div class="chip">Tabela de Abril · ao vivo</div>
+            </div>
+          </div>
+          <div class="spacer"></div>
+          ${state.secondary ? `<button class="icon-btn" title="Histórico">${ICON.clock}</button>` : ''}
+          <button class="icon-btn" title="Tema">${themeIcon()}</button>
+        </div>
+      </div>
+    </header>`,
+};
+
+/* ---- Prompt output ---- */
+const DESCRIPTIONS = {
+  minimal: "a minimal single-line header with a thin bottom border, brand block on the left (logo + title + subtitle), and icon-only actions on the right",
+  gradient: "a header with a soft radial glow behind the logo area and a thin primary-to-transparent gradient stripe along the top edge; standard brand block on the left, pill-shaped action(s) + icon button on the right",
+  glass: "a floating glassmorphism header detached from the viewport edges, using backdrop-blur with a subtle border and soft drop-shadow, centered with max-width and padding-top gap",
+  editorial: "a centered editorial-style header with an uppercase colored eyebrow ('TABELA FIPE · 2026'), a large serif title (Fraunces), and absolutely-positioned action icons in the top-right corner",
+  split: "a split header with the brand on the far left, a pill-shaped segmented nav in the center (Consulta / Histórico / Gráfico), and actions aligned right — solid surface background with a bottom border",
+  bold: "a bold statement header using a dark primary gradient as the background, semi-transparent white logo tile, white text, and pill-styled actions — dominant visual presence regardless of theme",
+  cmd: "a command-bar style header with a central search input that triggers ⌘K palette, brand on the left, actions on the right — search-first discovery pattern",
+  badge: "a compact header where the brand subtitle is replaced by a live status chip showing the current FIPE reference month with a pulsing dot",
+};
+
+function updatePrompt() {
+  const parts = [];
+  parts.push(`Redesign the \`Header.tsx\` component to use ${DESCRIPTIONS[state.variant]}.`);
+
+  if (state.mono) parts.push('The logo should be monochrome (outline/surface, no filled primary color).');
+  if (!state.secondary) parts.push('Only the theme toggle should appear in the actions area — no secondary history button.');
+
+  parts.push(`Preserve the existing brand copy ("Fipe Fácil" / "Consulta de preços FIPE"), the theme toggle wiring via \`useTheme\`, and keep the component under 180 lines. Use shadcn primitives and existing Tailwind tokens (\`--primary\`, \`--border\`, \`--muted-foreground\`, etc.).`);
+
+  document.getElementById('prompt').textContent = parts.join(' ');
+}
+
+/* ---- Rendering ---- */
+function renderPreview() {
+  const preview = document.getElementById('preview');
+  preview.classList.toggle('light-preview', state.mode === 'light');
+  document.getElementById('header-slot').innerHTML = RENDERERS[state.variant]();
+}
+
+function sync() {
+  document.querySelectorAll('#variants .variant-card').forEach(b => {
+    b.setAttribute('aria-pressed', b.dataset.val === state.variant ? 'true' : 'false');
+  });
+  document.querySelectorAll('#mode-seg button').forEach(b => {
+    b.setAttribute('aria-pressed', b.dataset.val === state.mode ? 'true' : 'false');
+  });
+  document.getElementById('opt-icon').checked = state.secondary;
+  document.getElementById('opt-mono').checked = state.mono;
+}
+
+function updateAll() {
+  renderPreview();
+  updatePrompt();
+  sync();
+}
+
+/* ---- Wiring ---- */
+document.querySelectorAll('#variants .variant-card').forEach(btn => {
+  btn.addEventListener('click', () => { state.variant = btn.dataset.val; updateAll(); });
+});
+document.querySelectorAll('#mode-seg button').forEach(btn => {
+  btn.addEventListener('click', () => { state.mode = btn.dataset.val; updateAll(); });
+});
+document.getElementById('opt-icon').addEventListener('change', e => { state.secondary = e.target.checked; updateAll(); });
+document.getElementById('opt-mono').addEventListener('change', e => { state.mono = e.target.checked; updateAll(); });
+
+document.getElementById('copy').addEventListener('click', async () => {
+  const btn = document.getElementById('copy');
+  try {
+    await navigator.clipboard.writeText(document.getElementById('prompt').textContent);
+    const old = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = old, 1200);
+  } catch {
+    btn.textContent = 'Copy failed';
+  }
+});
+
+updateAll();
+</script>
+</body>
+</html>
