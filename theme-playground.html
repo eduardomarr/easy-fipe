@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FIPE Theme Playground</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ui-bg: #0b0b0f;
+    --ui-panel: #14141a;
+    --ui-border: #26262f;
+    --ui-text: #e8e8ee;
+    --ui-muted: #8a8a96;
+    --ui-accent: #ff5a5f;
+    --ui-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--ui-bg);
+    color: var(--ui-text);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .app {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    height: 100vh;
+  }
+
+  /* -------- Controls panel -------- */
+  .controls {
+    border-right: 1px solid var(--ui-border);
+    padding: 20px;
+    overflow-y: auto;
+    background: var(--ui-panel);
+  }
+
+  .controls h1 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .controls .sub {
+    color: var(--ui-muted);
+    font-size: 12px;
+    margin-bottom: 20px;
+  }
+
+  .group {
+    margin-bottom: 22px;
+  }
+
+  .group-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ui-muted);
+    margin-bottom: 10px;
+  }
+
+  .segmented {
+    display: grid;
+    grid-auto-columns: 1fr;
+    grid-auto-flow: column;
+    gap: 4px;
+    background: var(--ui-bg);
+    border: 1px solid var(--ui-border);
+    border-radius: 8px;
+    padding: 3px;
+  }
+
+  .segmented button {
+    all: unset;
+    text-align: center;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--ui-muted);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+
+  .segmented button:hover { color: var(--ui-text); }
+
+  .segmented button[aria-pressed="true"] {
+    background: var(--ui-accent);
+    color: #fff;
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .row-label {
+    font-size: 12px;
+    color: var(--ui-text);
+  }
+
+  .row-value {
+    font-family: var(--ui-mono);
+    font-size: 11px;
+    color: var(--ui-muted);
+  }
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--ui-accent);
+  }
+
+  .presets {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .preset-btn {
+    all: unset;
+    cursor: pointer;
+    text-align: center;
+    padding: 8px 6px;
+    border: 1px solid var(--ui-border);
+    border-radius: 8px;
+    font-size: 12px;
+    transition: border-color .15s, background .15s;
+  }
+
+  .preset-btn:hover {
+    border-color: var(--ui-accent);
+    background: rgba(255, 90, 95, 0.08);
+  }
+
+  .hue-preview {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 6px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  /* -------- Preview panel -------- */
+  .preview-wrap {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    overflow: hidden;
+  }
+
+  .preview {
+    overflow: auto;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,0.03), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(255,255,255,0.03), transparent 40%),
+      var(--preview-bg, #0b0b0f);
+    transition: background .3s;
+  }
+
+  /* ---- FIPE card (themed) ---- */
+  .fipe-card {
+    --radius: 16px;
+    --pad: 28px;
+
+    width: 100%;
+    max-width: 520px;
+    background: var(--surface);
+    backdrop-filter: var(--surface-blur);
+    -webkit-backdrop-filter: var(--surface-blur);
+    border: var(--surface-border);
+    border-radius: var(--radius);
+    padding: var(--pad);
+    box-shadow: var(--surface-shadow);
+    color: var(--fg);
+    transition: background .2s, border-color .2s, box-shadow .2s, color .2s;
+  }
+
+  .fipe-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 22px;
+  }
+
+  .fipe-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .fipe-vehicle {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .fipe-variant {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .fipe-badge {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .fipe-price {
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--fg);
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .fipe-price-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 22px;
+  }
+
+  .fipe-meta {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding-top: 18px;
+    border-top: 1px solid var(--divider);
+  }
+
+  .fipe-meta-item .k {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .fipe-meta-item .v {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg);
+  }
+
+  .fipe-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .btn-primary {
+    flex: 1;
+    padding: 11px 14px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    border: none;
+    border-radius: calc(var(--radius) - 8px);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter .15s, transform .15s;
+  }
+
+  .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+  .btn-ghost {
+    padding: 11px 14px;
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--divider);
+    border-radius: calc(var(--radius) - 8px);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .15s;
+  }
+
+  .btn-ghost:hover { background: var(--hover); }
+
+  /* -------- Output panel -------- */
+  .output {
+    border-top: 1px solid var(--ui-border);
+    padding: 16px 20px;
+    background: var(--ui-panel);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 8px;
+    max-height: 280px;
+  }
+
+  .output-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .output-head h2 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ui-muted);
+  }
+
+  .copy-btn {
+    all: unset;
+    cursor: pointer;
+    padding: 6px 12px;
+    background: var(--ui-accent);
+    color: #fff;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: filter .15s;
+  }
+
+  .copy-btn:hover { filter: brightness(1.08); }
+
+  .output pre {
+    background: var(--ui-bg);
+    border: 1px solid var(--ui-border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: var(--ui-mono);
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: var(--ui-text);
+    overflow: auto;
+    white-space: pre;
+  }
+
+  /* ---- Mode toggle on the preview ---- */
+  .mode-pill {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    gap: 2px;
+    background: rgba(20,20,26,0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--ui-border);
+    border-radius: 999px;
+    padding: 3px;
+    z-index: 10;
+  }
+  .mode-pill button {
+    all: unset;
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--ui-muted);
+    transition: background .15s, color .15s;
+  }
+  .mode-pill button[aria-pressed="true"] {
+    background: var(--ui-text);
+    color: var(--ui-bg);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- CONTROLS -->
+  <aside class="controls">
+    <h1>FIPE Theme Studio</h1>
+    <p class="sub">Explore palettes, surfaces, and accents. Copy the tokens into <code>src/index.css</code>.</p>
+
+    <div class="group">
+      <div class="group-label">Preset</div>
+      <div class="presets" id="presets"></div>
+    </div>
+
+    <div class="group">
+      <div class="group-label">Base Palette</div>
+      <div class="segmented" id="base-seg" role="tablist">
+        <button data-val="neutral">Neutral</button>
+        <button data-val="warm">Warm</button>
+        <button data-val="cool">Cool</button>
+        <button data-val="mocha">Mocha</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-label">Surface Style</div>
+      <div class="segmented" id="surface-seg" role="tablist">
+        <button data-val="flat">Flat</button>
+        <button data-val="elevated">Elevated</button>
+        <button data-val="glass">Glass</button>
+        <button data-val="outline">Outline</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-label">Accent</div>
+      <div class="row">
+        <span class="row-label"><span class="hue-preview" id="hue-swatch"></span>Hue</span>
+        <span class="row-value" id="hue-val">27°</span>
+      </div>
+      <input type="range" id="hue" min="0" max="360" value="27" />
+      <div class="row" style="margin-top:10px">
+        <span class="row-label">Chroma</span>
+        <span class="row-value" id="chroma-val">0.22</span>
+      </div>
+      <input type="range" id="chroma" min="0" max="0.3" step="0.01" value="0.22" />
+    </div>
+
+    <div class="group">
+      <div class="group-label">Shape</div>
+      <div class="row">
+        <span class="row-label">Radius</span>
+        <span class="row-value" id="radius-val">16px</span>
+      </div>
+      <input type="range" id="radius" min="0" max="28" value="16" />
+      <div class="row" style="margin-top:10px">
+        <span class="row-label">Padding</span>
+        <span class="row-value" id="pad-val">28px</span>
+      </div>
+      <input type="range" id="pad" min="16" max="40" value="28" />
+    </div>
+  </aside>
+
+  <!-- PREVIEW + OUTPUT -->
+  <section class="preview-wrap">
+    <div class="preview" id="preview">
+      <div class="mode-pill">
+        <button data-mode="light" id="mode-light">Light</button>
+        <button data-mode="dark" id="mode-dark" aria-pressed="true">Dark</button>
+      </div>
+
+      <article class="fipe-card" id="card">
+        <header class="fipe-head">
+          <div>
+            <div class="fipe-label">Tabela FIPE</div>
+            <div class="fipe-vehicle">Honda Civic Touring</div>
+            <div class="fipe-variant">2023 · 1.5 Turbo · Gasolina</div>
+          </div>
+          <div class="fipe-badge">Abril/2026</div>
+        </header>
+
+        <div class="fipe-price">R$ 178.420</div>
+        <div class="fipe-price-sub">Valor médio de mercado · Código 026001-9</div>
+
+        <div class="fipe-meta">
+          <div class="fipe-meta-item">
+            <div class="k">Mês anterior</div>
+            <div class="v">R$ 176.890</div>
+          </div>
+          <div class="fipe-meta-item">
+            <div class="k">Variação</div>
+            <div class="v" style="color:var(--accent)">+0,87%</div>
+          </div>
+          <div class="fipe-meta-item">
+            <div class="k">Combustível</div>
+            <div class="v">Gasolina</div>
+          </div>
+        </div>
+
+        <div class="fipe-actions">
+          <button class="btn-primary">Salvar no histórico</button>
+          <button class="btn-ghost">Compartilhar</button>
+        </div>
+      </article>
+    </div>
+
+    <div class="output">
+      <div class="output-head">
+        <h2>Generated CSS tokens</h2>
+        <button class="copy-btn" id="copy">Copy tokens</button>
+      </div>
+      <pre id="tokens"></pre>
+    </div>
+  </section>
+</div>
+
+<script>
+const DEFAULTS = {
+  mode: 'dark',
+  base: 'neutral',
+  surface: 'elevated',
+  hue: 27,
+  chroma: 0.22,
+  radius: 16,
+  pad: 28,
+};
+
+const state = { ...DEFAULTS };
+
+const PRESETS = {
+  'Ember (default)': { mode: 'dark', base: 'neutral', surface: 'elevated', hue: 27,  chroma: 0.22, radius: 16, pad: 28 },
+  'Mocha Warm':     { mode: 'dark', base: 'mocha',   surface: 'elevated', hue: 40,  chroma: 0.16, radius: 14, pad: 28 },
+  'Glass Cobalt':   { mode: 'dark', base: 'cool',    surface: 'glass',    hue: 240, chroma: 0.20, radius: 20, pad: 30 },
+  'Paper Light':    { mode: 'light',base: 'neutral', surface: 'flat',     hue: 200, chroma: 0.14, radius: 10, pad: 26 },
+  'Mint Editorial': { mode: 'light',base: 'cool',    surface: 'outline',  hue: 160, chroma: 0.15, radius: 8,  pad: 28 },
+  'Sunset Soft':    { mode: 'light',base: 'warm',    surface: 'elevated', hue: 12,  chroma: 0.18, radius: 18, pad: 28 },
+};
+
+/* ---- Base palette definitions (oklch lightness/chroma pairs) ---- */
+const BASES = {
+  neutral: { hueBg: 270, chromaBg: 0.005 },
+  warm:    { hueBg: 35,  chromaBg: 0.018 },
+  cool:    { hueBg: 240, chromaBg: 0.015 },
+  mocha:   { hueBg: 50,  chromaBg: 0.025 },
+};
+
+function oklch(l, c, h, a) {
+  return a == null ? `oklch(${l} ${c} ${h})` : `oklch(${l} ${c} ${h} / ${a})`;
+}
+
+/* ---- Compute full theme tokens ---- */
+function computeTokens() {
+  const base = BASES[state.base];
+  const hb = base.hueBg;
+  const cb = base.chromaBg;
+  const h = state.hue;
+  const c = state.chroma;
+
+  const isDark = state.mode === 'dark';
+
+  const bg       = isDark ? oklch(0.14, cb, hb)       : oklch(0.99, cb * 0.5, hb);
+  const surface  = isDark ? oklch(0.19, cb * 1.2, hb) : oklch(1.00, 0, hb);
+  const fg       = isDark ? oklch(0.96, 0.01, hb)     : oklch(0.18, 0.01, hb);
+  const muted    = isDark ? oklch(0.65, 0.01, hb)     : oklch(0.48, 0.01, hb);
+  const divider  = isDark ? oklch(0.28, cb, hb)       : oklch(0.92, cb, hb);
+  const hover    = isDark ? oklch(0.24, cb, hb)       : oklch(0.96, cb, hb);
+
+  const accent     = oklch(isDark ? 0.65 : 0.52, c, h);
+  const accentSoft = oklch(isDark ? 0.30 : 0.94, c * 0.6, h);
+  const accentFg   = oklch(isDark ? 0.12 : 0.99, 0.01, h);
+
+  /* Surface presentation */
+  let surfaceBg = surface;
+  let surfaceBorder = `1px solid ${divider}`;
+  let surfaceBlur = 'none';
+  let surfaceShadow = 'none';
+
+  if (state.surface === 'elevated') {
+    surfaceShadow = isDark
+      ? '0 20px 50px -20px rgba(0,0,0,0.65), 0 2px 6px rgba(0,0,0,0.3)'
+      : '0 20px 50px -20px rgba(17,24,39,0.18), 0 2px 6px rgba(17,24,39,0.06)';
+    surfaceBorder = isDark
+      ? `1px solid ${oklch(0.28, cb, hb)}`
+      : `1px solid ${oklch(0.94, cb, hb)}`;
+  } else if (state.surface === 'glass') {
+    surfaceBg = isDark
+      ? oklch(0.22, cb * 1.5, hb, 0.55)
+      : oklch(1.00, 0, hb, 0.55);
+    surfaceBlur = 'blur(18px) saturate(160%)';
+    surfaceBorder = isDark
+      ? `1px solid ${oklch(0.40, cb, hb, 0.3)}`
+      : `1px solid ${oklch(0.80, cb, hb, 0.5)}`;
+    surfaceShadow = isDark
+      ? '0 10px 40px rgba(0,0,0,0.4)'
+      : '0 10px 40px rgba(17,24,39,0.08)';
+  } else if (state.surface === 'outline') {
+    surfaceShadow = 'none';
+    surfaceBorder = `1px solid ${divider}`;
+  } else {
+    surfaceShadow = 'none';
+    surfaceBorder = 'none';
+  }
+
+  return {
+    bg, surface: surfaceBg, fg, muted, divider, hover,
+    accent, accentSoft, accentFg,
+    surfaceBorder, surfaceBlur, surfaceShadow,
+    rawSurface: surface,
+    isDark,
+  };
+}
+
+/* ---- Apply to preview ---- */
+function renderPreview() {
+  const t = computeTokens();
+  const preview = document.getElementById('preview');
+  const card = document.getElementById('card');
+
+  preview.style.setProperty('--preview-bg', t.bg);
+
+  card.style.setProperty('--surface', t.surface);
+  card.style.setProperty('--fg', t.fg);
+  card.style.setProperty('--muted', t.muted);
+  card.style.setProperty('--divider', t.divider);
+  card.style.setProperty('--hover', t.hover);
+  card.style.setProperty('--accent', t.accent);
+  card.style.setProperty('--accent-soft', t.accentSoft);
+  card.style.setProperty('--accent-fg', t.accentFg);
+  card.style.setProperty('--surface-border', t.surfaceBorder);
+  card.style.setProperty('--surface-blur', t.surfaceBlur);
+  card.style.setProperty('--surface-shadow', t.surfaceShadow);
+  card.style.setProperty('--radius', state.radius + 'px');
+  card.style.setProperty('--pad', state.pad + 'px');
+
+  document.getElementById('hue-swatch').style.background =
+    `oklch(0.6 ${state.chroma} ${state.hue})`;
+}
+
+/* ---- Token output ---- */
+function updateTokens() {
+  const t = computeTokens();
+  const mode = state.mode;
+  const tokens =
+`/* FIPE theme · ${state.base} base · ${state.surface} surface · ${mode} */
+:root${mode === 'dark' ? '.dark' : ''} {
+  --background: ${t.bg};
+  --foreground: ${t.fg};
+  --card: ${t.rawSurface};
+  --card-foreground: ${t.fg};
+  --muted: ${t.hover};
+  --muted-foreground: ${t.muted};
+  --border: ${t.divider};
+  --primary: ${t.accent};
+  --primary-foreground: ${t.accentFg};
+  --accent-soft: ${t.accentSoft};
+
+  --radius: ${state.radius}px;
+}
+
+/* Card surface preset — ${state.surface} */
+.card {
+  background: ${t.surface};
+  border: ${t.surfaceBorder};
+  ${t.surfaceBlur !== 'none' ? `backdrop-filter: ${t.surfaceBlur};\n  ` : ''}box-shadow: ${t.surfaceShadow};
+  border-radius: var(--radius);
+}`;
+
+  document.getElementById('tokens').textContent = tokens;
+}
+
+function updateAll() {
+  renderPreview();
+  updateTokens();
+  syncControls();
+}
+
+/* ---- Controls wiring ---- */
+function syncSegmented(id, value) {
+  document.querySelectorAll(`#${id} button`).forEach(b => {
+    b.setAttribute('aria-pressed', b.dataset.val === value ? 'true' : 'false');
+  });
+}
+
+function syncControls() {
+  syncSegmented('base-seg', state.base);
+  syncSegmented('surface-seg', state.surface);
+  document.getElementById('mode-light').setAttribute('aria-pressed', state.mode === 'light');
+  document.getElementById('mode-dark').setAttribute('aria-pressed', state.mode === 'dark');
+  document.getElementById('hue').value = state.hue;
+  document.getElementById('chroma').value = state.chroma;
+  document.getElementById('radius').value = state.radius;
+  document.getElementById('pad').value = state.pad;
+  document.getElementById('hue-val').textContent = state.hue + '°';
+  document.getElementById('chroma-val').textContent = Number(state.chroma).toFixed(2);
+  document.getElementById('radius-val').textContent = state.radius + 'px';
+  document.getElementById('pad-val').textContent = state.pad + 'px';
+}
+
+function bindSegmented(id, key) {
+  document.querySelectorAll(`#${id} button`).forEach(btn => {
+    btn.addEventListener('click', () => {
+      state[key] = btn.dataset.val;
+      updateAll();
+    });
+  });
+}
+
+function bindSlider(id, key, parser = Number) {
+  document.getElementById(id).addEventListener('input', (e) => {
+    state[key] = parser(e.target.value);
+    updateAll();
+  });
+}
+
+/* ---- Presets ---- */
+function buildPresets() {
+  const wrap = document.getElementById('presets');
+  Object.entries(PRESETS).forEach(([name, preset]) => {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn';
+    btn.textContent = name;
+    btn.addEventListener('click', () => {
+      Object.assign(state, preset);
+      updateAll();
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+/* ---- Mode toggle ---- */
+document.getElementById('mode-light').addEventListener('click', () => { state.mode = 'light'; updateAll(); });
+document.getElementById('mode-dark').addEventListener('click', () => { state.mode = 'dark'; updateAll(); });
+
+/* ---- Copy ---- */
+document.getElementById('copy').addEventListener('click', async () => {
+  const btn = document.getElementById('copy');
+  const txt = document.getElementById('tokens').textContent;
+  try {
+    await navigator.clipboard.writeText(txt);
+    const old = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = old, 1200);
+  } catch {
+    btn.textContent = 'Copy failed';
+  }
+});
+
+/* ---- Init ---- */
+bindSegmented('base-seg', 'base');
+bindSegmented('surface-seg', 'surface');
+bindSlider('hue', 'hue');
+bindSlider('chroma', 'chroma');
+bindSlider('radius', 'radius');
+bindSlider('pad', 'pad');
+buildPresets();
+updateAll();
+</script>
+</body>
+</html>

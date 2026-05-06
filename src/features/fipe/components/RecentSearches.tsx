@@ -18,7 +18,7 @@ export function RecentSearches({ history, onRemove, onClear, onSelect }: Props) 
   const hiddenCount = history.length - MAX_VISIBLE
 
   return (
-    <Card className="border border-border/60">
+    <Card className="border-border/50">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-semibold">
@@ -33,11 +33,11 @@ export function RecentSearches({ history, onRemove, onClear, onSelect }: Props) 
         </div>
       </CardHeader>
       <CardContent>
-        <ul className="divide-y divide-border/60">
+        <ul className="divide-y divide-border/40">
           {visible.map((entry) => (
-            <li key={entry.id} className="flex items-center justify-between py-2.5 gap-2">
+            <li key={entry.id} className="flex items-center justify-between py-3 gap-2">
               <div
-                className={`min-w-0 flex items-center gap-3 flex-1 ${entry.brandCode ? 'cursor-pointer hover:opacity-80' : 'opacity-60'}`}
+                className={`min-w-0 flex items-center gap-3 flex-1 transition-opacity ${entry.brandCode ? 'cursor-pointer hover:opacity-70' : 'opacity-40'}`}
                 onClick={() => { if (!entry.brandCode) return; onSelect?.(entry) }}
               >
                 <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Card, CardContent } from '@/components/ui/card'
 import { track } from '@/lib/analytics'
 import { useFipeStore } from '@/store/fipeStore'
 import type { HistoryEntry, VehicleType } from '@/types/fipe'
@@ -40,7 +41,6 @@ export function FipeLookup() {
   const years = useYears(vehicleType, brandCode, modelCode)
   const price = useFipePrice(vehicleType, brandCode, modelCode, yearCode)
 
-  // Track whether we've already added this price result to avoid double-add in StrictMode
   const addedRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -74,7 +74,6 @@ export function FipeLookup() {
     addToHistory(entry)
   }, [price.data]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Reset the ref when the query changes so the new result can be added
   useEffect(() => {
     addedRef.current = null
   }, [vehicleType, brandCode, modelCode, yearCode])
@@ -138,34 +137,36 @@ export function FipeLookup() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <VehicleTypeSelector value={vehicleType} onChange={handleVehicleTypeChange} />
 
-      <BrandSelect
-        options={brands.data ?? []}
-        value={brandCode}
-        isLoading={brands.isLoading}
-        onChange={handleBrandChange}
-        onClear={handleBrandClear}
-      />
-
-      <ModelSelect
-        options={models.data ?? []}
-        value={modelCode}
-        isLoading={models.isLoading}
-        disabled={!brandCode}
-        onChange={handleModelChange}
-        onClear={handleModelClear}
-      />
-
-      <YearSelect
-        options={years.data ?? []}
-        value={yearCode}
-        isLoading={years.isLoading}
-        disabled={!modelCode}
-        onChange={handleYearChange}
-        onClear={handleYearClear}
-      />
+      <Card className="border-border/50">
+        <CardContent className="space-y-4 pt-5 pb-5">
+          <BrandSelect
+            options={brands.data ?? []}
+            value={brandCode}
+            isLoading={brands.isLoading}
+            onChange={handleBrandChange}
+            onClear={handleBrandClear}
+          />
+          <ModelSelect
+            options={models.data ?? []}
+            value={modelCode}
+            isLoading={models.isLoading}
+            disabled={!brandCode}
+            onChange={handleModelChange}
+            onClear={handleModelClear}
+          />
+          <YearSelect
+            options={years.data ?? []}
+            value={yearCode}
+            isLoading={years.isLoading}
+            disabled={!modelCode}
+            onChange={handleYearChange}
+            onClear={handleYearClear}
+          />
+        </CardContent>
+      </Card>
 
       {price.isError && (
         <Alert variant="destructive">

@@ -1,7 +1,7 @@
 import type { BrasilApiPrice, BrasilApiReference } from '@/types/fipe'
 import { track } from '@/lib/analytics'
 
-const BASE_URL = 'https://brasilapi.com.br/api/fipe'
+const BASE_URL = '/api/brasilapi/fipe'
 
 export async function fetchReferenceTables(): Promise<BrasilApiReference[]> {
   const res = await fetch(`${BASE_URL}/tabelas/v1`)

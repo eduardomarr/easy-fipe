@@ -58,6 +58,16 @@ export function usePriceHistory(
   const totalMonths = tables.length
   const loadedMonths = priceQueries.filter((q) => q.isSuccess).length
   const isLoading = tablesQuery.isLoading || priceQueries.some((q) => q.isLoading)
+  const isError =
+    tablesQuery.isError ||
+    (tables.length > 0 && priceQueries.every((q) => q.isError))
 
-  return { data, totalMonths, loadedMonths, isLoading }
+  const refetch = () => {
+    void tablesQuery.refetch()
+    priceQueries.forEach((q) => {
+      void q.refetch()
+    })
+  }
+
+  return { data, totalMonths, loadedMonths, isLoading, isError, refetch }
 }
