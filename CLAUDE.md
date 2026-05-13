@@ -72,3 +72,6 @@ PostHog (product analytics) and Google Analytics (GA4) are both initialized as s
 
 ### Event Handlers
 Never call multiple functions inline in a JSX event handler (e.g. `onClick={() => { track(...); onClear() }}`). Instead, wrap them in a single named handler function. For `track()` calls specifically, include them inside the callback that owns the action — not alongside it in the JSX.
+
+### Database Migrations
+Always create migrations using `drizzle-kit generate` or `drizzle-kit generate --custom`. Never write migration `.sql` files by hand.

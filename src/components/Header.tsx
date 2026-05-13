@@ -1,12 +1,18 @@
-import { Moon, Sun } from 'lucide-react'
+import { LogIn, Moon, Sun } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useTheme } from '@/hooks/useTheme'
 
 export function Header() {
   const { theme, toggleTheme } = useTheme()
+  const navigate = useNavigate()
 
   function handleToggleTheme() {
     toggleTheme()
+  }
+
+  function handleLogin() {
+    navigate('/login')
   }
 
   return (
@@ -24,15 +30,26 @@ export function Header() {
             <h1 className="text-lg font-bold tracking-tight">Fipe Fácil</h1>
             <p className="text-[11px] text-white/75 -mt-0.5">Consulta de preços FIPE</p>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="ml-auto rounded-full bg-white/12 border border-white/20 text-white hover:bg-white/20 hover:text-white"
-            onClick={handleToggleTheme}
-            aria-label="Alternar tema"
-          >
-            {theme === 'light' ? <Moon className="size-4" /> : <Sun className="size-4" />}
-          </Button>
+          <div className="ml-auto flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full bg-white/12 border border-white/20 text-white hover:bg-white/20 hover:text-white"
+              onClick={handleToggleTheme}
+              aria-label="Alternar tema"
+            >
+              {theme === 'light' ? <Moon className="size-4" /> : <Sun className="size-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full bg-white/12 border border-white/20 text-white hover:bg-white/20 hover:text-white"
+              onClick={handleLogin}
+              aria-label="Entrar"
+            >
+              <LogIn className="size-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </header>
