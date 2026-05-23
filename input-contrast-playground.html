@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Easy FIPE — Input Contrast Playground</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #111;
+    color: #e5e5e5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #222;
+    font-size: 13px;
+    color: #888;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  header span { color: #fff; font-weight: 600; }
+
+  .workspace {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ── Controls panel ── */
+  .controls {
+    width: 280px;
+    flex-shrink: 0;
+    border-right: 1px solid #222;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .control-group { display: flex; flex-direction: column; gap: 12px; }
+
+  .group-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #555;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #222;
+  }
+
+  .control { display: flex; flex-direction: column; gap: 6px; }
+
+  .control-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .control-label { font-size: 12px; color: #aaa; }
+  .control-value {
+    font-size: 11px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: #e5e5e5;
+    background: #1a1a1a;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+
+  .toggle-row {
+    display: flex;
+    gap: 6px;
+  }
+  .toggle-btn {
+    flex: 1;
+    padding: 6px;
+    border: 1px solid #333;
+    background: transparent;
+    color: #888;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .toggle-btn.active {
+    border-color: #fff;
+    background: #fff;
+    color: #111;
+    font-weight: 600;
+  }
+
+  /* Presets */
+  .presets { display: flex; flex-direction: column; gap: 6px; }
+  .preset-btn {
+    padding: 8px 12px;
+    border: 1px solid #2a2a2a;
+    background: #1a1a1a;
+    color: #ccc;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .preset-btn:hover { border-color: #444; color: #fff; }
+  .preset-btn small { display: block; color: #555; font-size: 10px; margin-top: 2px; }
+
+  /* ── Preview area ── */
+  .preview-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .previews {
+    flex: 1;
+    display: flex;
+    gap: 0;
+  }
+
+  .preview-pane {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 32px;
+    position: relative;
+  }
+  .preview-pane + .preview-pane {
+    border-left: 1px solid #222;
+  }
+
+  .pane-label {
+    position: absolute;
+    top: 12px; left: 16px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #555;
+  }
+
+  /* Auth card */
+  .auth-card {
+    width: 100%;
+    max-width: 320px;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .card-title { font-size: 16px; font-weight: 600; }
+  .card-desc { font-size: 13px; opacity: 0.6; margin-top: -8px; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field-label { font-size: 13px; font-weight: 500; }
+
+  .input-wrap { position: relative; }
+  .input-preview {
+    width: 100%;
+    height: 32px;
+    padding: 0 36px 0 10px;
+    border-radius: 0.625rem;
+    outline: none;
+    font-size: 14px;
+    font-family: inherit;
+    letter-spacing: 0.1em;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .input-preview::placeholder { letter-spacing: 0.15em; }
+
+  .eye-btn {
+    position: absolute;
+    right: 8px; top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    line-height: 0;
+    border-radius: 4px;
+  }
+
+  .submit-btn {
+    width: 100%;
+    height: 44px;
+    border: none;
+    border-radius: 0.625rem;
+    background: oklch(0.50 0.22 27);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 4px;
+    transition: opacity 0.15s;
+  }
+  .submit-btn:hover { opacity: 0.9; }
+
+  /* ── Output bar ── */
+  .output-bar {
+    border-top: 1px solid #222;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #0d0d0d;
+  }
+
+  .output-code {
+    flex: 1;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: #aef;
+    white-space: pre;
+    line-height: 1.6;
+  }
+
+  .copy-btn {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    background: #1e1e1e;
+    border: 1px solid #333;
+    color: #ccc;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { border-color: #555; color: #fff; }
+  .copy-btn.copied { background: #1a3a1a; border-color: #2d6a2d; color: #6fda6f; }
+</style>
+</head>
+<body>
+
+<header><span>Easy FIPE</span> — Input Contrast Playground</header>
+
+<div class="workspace">
+  <!-- Controls -->
+  <div class="controls">
+
+    <div class="control-group">
+      <div class="group-label">Presets</div>
+      <div class="presets">
+        <button class="preset-btn" onclick="applyPreset('current')">
+          Current (Low contrast)
+          <small>L=0.80 light · L=0.30 dark · 1px</small>
+        </button>
+        <button class="preset-btn" onclick="applyPreset('medium')">
+          Medium contrast
+          <small>L=0.72 light · L=0.38 dark · 1px</small>
+        </button>
+        <button class="preset-btn" onclick="applyPreset('strong')">
+          Strong contrast
+          <small>L=0.62 light · L=0.45 dark · 1px</small>
+        </button>
+        <button class="preset-btn" onclick="applyPreset('tinted')">
+          Tinted + bold border
+          <small>L=0.68 light · tint 0.06 · 2px</small>
+        </button>
+        <button class="preset-btn" onclick="applyPreset('bold')">
+          Bold outline
+          <small>L=0.55 light · L=0.48 dark · 2px</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="group-label">Light mode</div>
+
+      <div class="control">
+        <div class="control-header">
+          <span class="control-label">Border lightness</span>
+          <span class="control-value" id="val-light-l">0.80</span>
+        </div>
+        <input type="range" id="light-l" min="0.60" max="0.95" step="0.01" value="0.80"
+          oninput="state.lightL = +this.value; updateAll()">
+      </div>
+
+      <div class="control">
+        <div class="control-header">
+          <span class="control-label">Background tint opacity</span>
+          <span class="control-value" id="val-light-bg">0</span>
+        </div>
+        <input type="range" id="light-bg" min="0" max="0.15" step="0.005" value="0"
+          oninput="state.lightBg = +this.value; updateAll()">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="group-label">Dark mode</div>
+
+      <div class="control">
+        <div class="control-header">
+          <span class="control-label">Border lightness</span>
+          <span class="control-value" id="val-dark-l">0.30</span>
+        </div>
+        <input type="range" id="dark-l" min="0.20" max="0.55" step="0.01" value="0.30"
+          oninput="state.darkL = +this.value; updateAll()">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="group-label">Border width</div>
+      <div class="toggle-row">
+        <button class="toggle-btn active" id="btn-1px" onclick="setBorderWidth(1)">1px</button>
+        <button class="toggle-btn" id="btn-2px" onclick="setBorderWidth(2)">2px</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Preview + output -->
+  <div class="preview-area">
+    <div class="previews">
+      <!-- Light mode -->
+      <div class="preview-pane" id="pane-light" style="background: oklch(0.97 0.004 75);">
+        <div class="pane-label">Light mode</div>
+        <div class="auth-card" id="card-light"
+          style="background: oklch(1.00 0 0); box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06); color: oklch(0.11 0.003 75);">
+          <div>
+            <div class="card-title">Entrar</div>
+            <div class="card-desc">Acesse sua conta para continuar</div>
+          </div>
+          <div class="field">
+            <label class="field-label">Senha</label>
+            <div class="input-wrap">
+              <input class="input-preview" id="input-light"
+                type="password" placeholder="••••••••"
+                style="color: oklch(0.11 0.003 75);">
+              <button class="eye-btn" tabindex="-1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="oklch(0.55 0 0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button class="submit-btn">Entrar</button>
+        </div>
+      </div>
+
+      <!-- Dark mode -->
+      <div class="preview-pane" id="pane-dark" style="background: oklch(0.13 0 0);">
+        <div class="pane-label" style="color: #444;">Dark mode</div>
+        <div class="auth-card" id="card-dark"
+          style="background: oklch(0.13 0 0); box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.4); border: 1px solid oklch(0.22 0 0); color: oklch(1.00 0 0);">
+          <div>
+            <div class="card-title">Entrar</div>
+            <div class="card-desc">Acesse sua conta para continuar</div>
+          </div>
+          <div class="field">
+            <label class="field-label">Senha</label>
+            <div class="input-wrap">
+              <input class="input-preview" id="input-dark"
+                type="password" placeholder="••••••••"
+                style="color: oklch(1.00 0 0);">
+              <button class="eye-btn" tabindex="-1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="oklch(0.55 0 0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button class="submit-btn">Entrar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="output-bar">
+      <pre class="output-code" id="output-code"></pre>
+      <button class="copy-btn" id="copy-btn" onclick="copyOutput()">Copy CSS</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const state = {
+    lightL: 0.80,
+    lightBg: 0,
+    darkL: 0.30,
+    borderWidth: 1,
+  };
+
+  const PRESETS = {
+    current:  { lightL: 0.80, lightBg: 0,    darkL: 0.30, borderWidth: 1 },
+    medium:   { lightL: 0.72, lightBg: 0,    darkL: 0.38, borderWidth: 1 },
+    strong:   { lightL: 0.62, lightBg: 0,    darkL: 0.45, borderWidth: 1 },
+    tinted:   { lightL: 0.68, lightBg: 0.06, darkL: 0.40, borderWidth: 2 },
+    bold:     { lightL: 0.55, lightBg: 0,    darkL: 0.48, borderWidth: 2 },
+  };
+
+  function applyPreset(name) {
+    const p = PRESETS[name];
+    Object.assign(state, p);
+    document.getElementById('light-l').value = state.lightL;
+    document.getElementById('light-bg').value = state.lightBg;
+    document.getElementById('dark-l').value = state.darkL;
+    setBorderWidth(state.borderWidth, false);
+    updateAll();
+  }
+
+  function setBorderWidth(w, doUpdate = true) {
+    state.borderWidth = w;
+    document.getElementById('btn-1px').classList.toggle('active', w === 1);
+    document.getElementById('btn-2px').classList.toggle('active', w === 2);
+    if (doUpdate) updateAll();
+  }
+
+  function fmt(n) { return n.toFixed(3).replace(/0+$/, '').replace(/\.$/, ''); }
+
+  function renderPreview() {
+    const lL = fmt(state.lightL);
+    const dL = fmt(state.darkL);
+    const bw = state.borderWidth + 'px';
+    const bgTint = state.lightBg > 0
+      ? `oklch(${fmt(0.85 - (0.15 - state.lightBg) * 0.5)} 0.005 75 / ${fmt(state.lightBg * 10)})`
+      : 'transparent';
+
+    // Light input
+    const il = document.getElementById('input-light');
+    il.style.border = `${bw} solid oklch(${lL} 0.007 75)`;
+    il.style.background = bgTint;
+    il.style.borderRadius = '0.625rem';
+
+    // Dark input — bg is slightly lighter than card
+    const darkBgL = Math.min(0.22, state.darkL * 0.5 + 0.08);
+    const id = document.getElementById('input-dark');
+    id.style.border = `${bw} solid oklch(${dL} 0 0)`;
+    id.style.background = `oklch(${fmt(darkBgL)} 0 0)`;
+    id.style.borderRadius = '0.625rem';
+
+    // Value labels
+    document.getElementById('val-light-l').textContent = lL;
+    document.getElementById('val-light-bg').textContent = fmt(state.lightBg);
+    document.getElementById('val-dark-l').textContent = dL;
+  }
+
+  function updatePrompt() {
+    const lL = fmt(state.lightL);
+    const dL = fmt(state.darkL);
+    const bg = state.lightBg > 0 ? `oklch(0.93 0.006 75 / ${Math.round(state.lightBg * 100)}%)` : 'transparent';
+    const bw = state.borderWidth + 'px';
+
+    const css = [
+      `/* src/index.css — paste into :root and .dark */`,
+      ``,
+      `:root {`,
+      `  --input: oklch(${lL} 0.007 75);`,
+      state.lightBg > 0 ? `  /* input bg tint: ${bg} */` : null,
+      `}`,
+      ``,
+      `.dark {`,
+      `  --input: oklch(${dL} 0 0);`,
+      `}`,
+      state.borderWidth === 2 ? `\n/* Also add to src/components/ui/input.tsx: */\n/* Change "border" → "border-2" in className */` : null,
+    ].filter(l => l !== null).join('\n');
+
+    document.getElementById('output-code').textContent = css;
+  }
+
+  function updateAll() {
+    renderPreview();
+    updatePrompt();
+  }
+
+  function copyOutput() {
+    const text = document.getElementById('output-code').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy CSS';
+        btn.classList.remove('copied');
+      }, 1800);
+    });
+  }
+
+  // Init
+  updateAll();
+</script>
+</body>
+</html>

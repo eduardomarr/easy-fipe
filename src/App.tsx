@@ -5,6 +5,11 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { FipeLookup } from '@/features/fipe/FipeLookup'
 import { AuthPage } from '@/features/auth/AuthPage'
+import { DashboardView } from '@/features/dashboard/DashboardView'
+import { HistoryView } from '@/features/history/HistoryView'
+import { FavoritesView } from '@/features/favorites/FavoritesView'
+import { SettingsView } from '@/features/settings/SettingsView'
+import { UsersView } from '@/features/admin/UsersView'
 import { Header } from '@/components/Header'
 import { ONE_DAY } from '@/constants/cachePeriods'
 import { supabase } from '@/lib/supabase'
@@ -47,7 +52,14 @@ function AppRoot() {
       <Route
         path="/app"
         element={session ? <AppLayout onExitApp={() => navigate('/')} /> : <Navigate to="/login" replace />}
-      />
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<DashboardView onGoToSearch={() => navigate('/')} />} />
+        <Route path="history" element={<HistoryView />} />
+        <Route path="favorites" element={<FavoritesView />} />
+        <Route path="settings" element={<SettingsView />} />
+        <Route path="users" element={<UsersView />} />
+      </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

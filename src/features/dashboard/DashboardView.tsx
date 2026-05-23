@@ -1,8 +1,8 @@
 import { Car, Clock, Search } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useFipeStore } from '@/store/fipeStore'
-import type { ViewType } from '@/components/layout/AppLayout'
 import type { VehicleType } from '@/types/fipe'
 
 const VEHICLE_LABELS: Record<VehicleType, string> = {
@@ -12,12 +12,12 @@ const VEHICLE_LABELS: Record<VehicleType, string> = {
 }
 
 interface Props {
-  onNavigate: (view: ViewType) => void
   onGoToSearch: () => void
 }
 
-export function DashboardView({ onNavigate, onGoToSearch }: Props) {
+export function DashboardView({ onGoToSearch }: Props) {
   const history = useFipeStore((s) => s.history)
+  const navigate = useNavigate()
 
   const uniqueCodes = new Set(history.map((h) => h.fipeCode)).size
   const lastSearch = history[0]
@@ -28,7 +28,7 @@ export function DashboardView({ onNavigate, onGoToSearch }: Props) {
   }, {})
 
   function handleGoHistory() {
-    onNavigate('history')
+    navigate('/app/history')
   }
 
   if (history.length === 0) {

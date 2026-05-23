@@ -1,41 +1,48 @@
-import { ChevronLeft, History, Home, LayoutDashboard, Moon, Settings, Sun } from 'lucide-react'
+import { ChevronLeft, Heart, History, Home, LayoutDashboard, LogOut, Moon, Settings, Sun, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useTheme } from '@/hooks/useTheme'
+import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
-import type { ViewType } from './AppLayout'
 
 interface NavItem {
-  id: ViewType
   label: string
   icon: LucideIcon
+  path: string
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'history', label: 'Histórico', icon: History },
-  { id: 'settings', label: 'Configurações', icon: Settings },
+const BASE_NAV_ITEMS: NavItem[] = [
+  { label: 'Dashboard', icon: LayoutDashboard, path: '/app/dashboard' },
+  { label: 'Histórico', icon: History, path: '/app/history' },
+  { label: 'Favoritos', icon: Heart, path: '/app/favorites' },
+  { label: 'Configurações', icon: Settings, path: '/app/settings' },
+]
+
+const ADMIN_NAV_ITEMS: NavItem[] = [
+  { label: 'Usuários', icon: Users, path: '/app/users' },
 ]
 
 interface AppSidebarProps {
-  activeView: ViewType
-  onNavigate: (view: ViewType) => void
   collapsed: boolean
   onToggleCollapse: () => void
   onExitApp: () => void
 }
 
-export function AppSidebar({
-  activeView,
-  onNavigate,
-  collapsed,
-  onToggleCollapse,
-  onExitApp,
-}: AppSidebarProps) {
+export function AppSidebar({ collapsed, onToggleCollapse, onExitApp }: AppSidebarProps) {
   const { theme, toggleTheme } = useTheme()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { data: currentUser } = useCurrentUser()
+  const isAdmin = currentUser?.role === 'admin'
 
   function handleThemeToggle() {
     toggleTheme()
+  }
+
+  async function handleSignOut() {
+    await supabase.auth.signOut()
   }
 
   return (
@@ -66,7 +73,7 @@ export function AppSidebar({
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 space-y-0.5 p-2">
+      <nav className="flex-1 space-y-0.5 overflow-y-auto p-2">
         {/* Back to search */}
         <Button
           variant="ghost"
@@ -83,14 +90,14 @@ export function AppSidebar({
 
         <div className="mb-1 border-t border-sidebar-border" />
 
-        {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
-          const isActive = activeView === id
+        {BASE_NAV_ITEMS.map(({ label, icon: Icon, path }) => {
+          const isActive = location.pathname.startsWith(path)
           function handleNav() {
-            onNavigate(id)
+            navigate(path)
           }
           return (
             <Button
-              key={id}
+              key={path}
               variant="ghost"
               onClick={handleNav}
               title={collapsed ? label : undefined}
@@ -108,6 +115,42 @@ export function AppSidebar({
             </Button>
           )
         })}
+
+        {isAdmin && (
+          <>
+            <div className="mt-2 border-t border-sidebar-border" />
+            {!collapsed && (
+              <p className="px-2.5 pb-1 pt-2 text-[10px] font-medium uppercase tracking-widest text-sidebar-foreground/40">
+                Admin
+              </p>
+            )}
+            {ADMIN_NAV_ITEMS.map(({ label, icon: Icon, path }) => {
+              const isActive = location.pathname.startsWith(path)
+              function handleNav() {
+                navigate(path)
+              }
+              return (
+                <Button
+                  key={path}
+                  variant="ghost"
+                  onClick={handleNav}
+                  title={collapsed ? label : undefined}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={cn(
+                    'h-9 w-full font-normal transition-colors',
+                    collapsed ? 'justify-center px-0' : 'justify-start gap-2.5 px-2.5',
+                    isActive
+                      ? 'bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 hover:text-sidebar-primary-foreground'
+                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                  )}
+                >
+                  <Icon className="size-4 shrink-0" />
+                  {!collapsed && <span className="text-sm">{label}</span>}
+                </Button>
+              )
+            })}
+          </>
+        )}
       </nav>
 
       {/* Bottom */}
@@ -133,6 +176,19 @@ export function AppSidebar({
         </Button>
         <Button
           variant="ghost"
+          onClick={handleSignOut}
+          title={collapsed ? 'Sair' : undefined}
+          aria-label="Sair da conta"
+          className={cn(
+            'h-9 w-full font-normal text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground',
+            collapsed ? 'justify-center px-0' : 'justify-start gap-2.5 px-2.5',
+          )}
+        >
+          <LogOut className="size-4 shrink-0" />
+          {!collapsed && <span className="text-sm">Sair</span>}
+        </Button>
+        <Button
+          variant="ghost"
           onClick={onToggleCollapse}
           aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
           className={cn(
@@ -146,7 +202,6 @@ export function AppSidebar({
               collapsed && 'rotate-180',
             )}
           />
-          {!collapsed && <span className="text-xs">Recolher</span>}
         </Button>
       </div>
     </aside>

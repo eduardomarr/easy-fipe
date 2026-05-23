@@ -3,6 +3,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Card, CardContent } from '@/components/ui/card'
 import { track } from '@/lib/analytics'
 import { useFipeStore } from '@/store/fipeStore'
+import { useAuthStore } from '@/store/authStore'
+import { useFavorites, useAddFavorite, useRemoveFavorite } from '@/features/favorites/hooks/useFavorites'
 import type { HistoryEntry, VehicleType } from '@/types/fipe'
 import { useBrands } from './hooks/useBrands'
 import { useFipePrice } from './hooks/useFipePrice'
@@ -33,6 +35,11 @@ export function FipeLookup() {
     removeFromHistory,
     clearHistory,
   } = useFipeStore()
+
+  const session = useAuthStore((s) => s.session)
+  const { data: serverFavorites } = useFavorites()
+  const addFavoriteMutation = useAddFavorite()
+  const removeFavoriteMutation = useRemoveFavorite()
 
   const { vehicleType, brandCode, modelCode, yearCode } = selection
 
@@ -136,6 +143,26 @@ export function FipeLookup() {
     clearHistory()
   }
 
+  const isFavorited = price.data
+    ? (serverFavorites ?? []).some((f) => f.fipeCode === price.data!.fipeCode)
+    : false
+
+  const handleToggleFavorite = session
+    ? () => {
+        if (!price.data) return
+        if (isFavorited) {
+          track('favorite_removed', { fipe_code: price.data.fipeCode })
+          removeFavoriteMutation.mutate(price.data.fipeCode)
+        } else {
+          const vehicleLabel = [selection.brandName, selection.modelName, selection.yearName]
+            .filter(Boolean)
+            .join(' ')
+          track('favorite_added', { fipe_code: price.data.fipeCode })
+          addFavoriteMutation.mutate({ fipeCode: price.data.fipeCode, vehicleLabel })
+        }
+      }
+    : undefined
+
   return (
     <div className="space-y-6">
       <VehicleTypeSelector value={vehicleType} onChange={handleVehicleTypeChange} />
@@ -180,7 +207,13 @@ export function FipeLookup() {
 
       {price.isLoading && yearCode && <FipeResultSkeleton />}
 
-      {price.data && <FipeResult data={price.data} />}
+      {price.data && (
+        <FipeResult
+          data={price.data}
+          isFavorited={isFavorited}
+          onToggleFavorite={handleToggleFavorite}
+        />
+      )}
 
       {price.data && (
         <PriceHistoryChart fipeCode={price.data.fipeCode} modelYear={price.data.modelYear} />

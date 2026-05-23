@@ -17,6 +17,18 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/brasilapi/, '/api'),
       },
+      '/favorites': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/me': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/users': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
     },
   },
 })

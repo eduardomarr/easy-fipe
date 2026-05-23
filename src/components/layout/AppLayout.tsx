@@ -1,15 +1,15 @@
 import { useState } from 'react'
-import { DashboardView } from '@/features/dashboard/DashboardView'
-import { HistoryView } from '@/features/history/HistoryView'
-import { SettingsView } from '@/features/settings/SettingsView'
+import { Outlet, useLocation } from 'react-router-dom'
 import { AppSidebar } from './AppSidebar'
 
-export type ViewType = 'dashboard' | 'history' | 'settings'
+export type ViewType = 'dashboard' | 'history' | 'favorites' | 'settings' | 'users'
 
 const PAGE_META: Record<ViewType, { title: string; subtitle: string }> = {
   dashboard: { title: 'Dashboard', subtitle: 'Visão geral das suas consultas FIPE' },
   history: { title: 'Histórico', subtitle: 'Todas as consultas realizadas' },
+  favorites: { title: 'Favoritos', subtitle: 'Veículos salvos como favoritos' },
   settings: { title: 'Configurações', subtitle: 'Preferências do aplicativo' },
+  users: { title: 'Usuários', subtitle: 'Gerenciar contas do aplicativo' },
 }
 
 interface Props {
@@ -17,20 +17,19 @@ interface Props {
 }
 
 export function AppLayout({ onExitApp }: Props) {
-  const [activeView, setActiveView] = useState<ViewType>('dashboard')
   const [collapsed, setCollapsed] = useState(false)
+  const location = useLocation()
 
   function handleToggleCollapse() {
     setCollapsed((c) => !c)
   }
 
-  const { title, subtitle } = PAGE_META[activeView]
+  const segment = location.pathname.split('/').pop() as ViewType
+  const { title, subtitle } = PAGE_META[segment] ?? PAGE_META.dashboard
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <AppSidebar
-        activeView={activeView}
-        onNavigate={setActiveView}
         collapsed={collapsed}
         onToggleCollapse={handleToggleCollapse}
         onExitApp={onExitApp}
@@ -43,11 +42,7 @@ export function AppLayout({ onExitApp }: Props) {
           </div>
         </header>
         <main className="flex-1 overflow-y-auto">
-          {activeView === 'dashboard' && (
-            <DashboardView onNavigate={setActiveView} onGoToSearch={onExitApp} />
-          )}
-          {activeView === 'history' && <HistoryView />}
-          {activeView === 'settings' && <SettingsView />}
+          <Outlet />
         </main>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { AlertCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export function LoginForm() {
@@ -54,9 +55,8 @@ export function LoginForm() {
         <label htmlFor="login-password" className="text-sm font-medium">
           Senha
         </label>
-        <Input
+        <PasswordInput
           id="login-password"
-          type="password"
           placeholder="••••••••"
           value={password}
           onChange={handlePasswordChange}

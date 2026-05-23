@@ -3,9 +3,6 @@ import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import { users } from './schema/users.js'
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'admin@easyfipe.local'
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'Admin1234!'
-
 const supabaseUrl = process.env.SUPABASE_URL
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 const databaseUrl = process.env.DATABASE_URL
@@ -13,6 +10,11 @@ const databaseUrl = process.env.DATABASE_URL
 if (!supabaseUrl || !serviceRoleKey || !databaseUrl) {
   throw new Error('SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and DATABASE_URL are required')
 }
+
+const SEED_USERS = [
+  { email: 'dado.nep@gmail.com', password: 'Admin1234!', fullName: 'Eduardo', role: 'admin' as const },
+  { email: 'user@test.com', password: 'User1234!', fullName: 'Test User', role: 'standard' as const },
+]
 
 const adminHeaders = {
   'Content-Type': 'application/json',
@@ -53,16 +55,16 @@ async function createAuthUser(email: string, password: string): Promise<string> 
   return body.id
 }
 
-const userId = await createAuthUser(ADMIN_EMAIL, ADMIN_PASSWORD)
-
 const sql = postgres(databaseUrl, { max: 1 })
 const db = drizzle(sql)
 
-await db
-  .insert(users)
-  .values({ id: userId, email: ADMIN_EMAIL, fullName: 'Admin' })
-  .onConflictDoNothing()
+for (const u of SEED_USERS) {
+  const userId = await createAuthUser(u.email, u.password)
+  await db
+    .insert(users)
+    .values({ id: userId, email: u.email, fullName: u.fullName, role: u.role })
+    .onConflictDoNothing()
+  console.log(`User ready — email: ${u.email}  role: ${u.role}`)
+}
 
 await sql.end()
-
-console.log(`Admin user ready — email: ${ADMIN_EMAIL}  password: ${ADMIN_PASSWORD}`)

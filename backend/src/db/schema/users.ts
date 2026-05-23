@@ -17,6 +17,7 @@ export const users = pgTable('users', {
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .notNull()
     .default(sql`now()`),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
 })
 
 export type User = typeof users.$inferSelect

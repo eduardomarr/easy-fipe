@@ -3,6 +3,7 @@ import { AlertCircle, MailCheck } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 export function SignupForm() {
@@ -72,9 +73,8 @@ export function SignupForm() {
         <label htmlFor="signup-password" className="text-sm font-medium">
           Senha
         </label>
-        <Input
+        <PasswordInput
           id="signup-password"
-          type="password"
           placeholder="Mínimo 6 caracteres"
           value={password}
           onChange={handlePasswordChange}

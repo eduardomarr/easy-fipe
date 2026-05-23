@@ -1,7 +1,7 @@
 import { and, desc, eq } from 'drizzle-orm'
 import { Router } from 'express'
 import { db } from '../db/client.js'
-import { favorites } from '../db/schema.js'
+import { favorites, users } from '../db/schema.js'
 import { requireAuth } from '../middleware/auth.js'
 import { createFavoriteSchema } from '../schemas/favorites.js'
 
@@ -19,6 +19,10 @@ favoritesRouter.get('/', requireAuth, async (req, res) => {
 
 favoritesRouter.post('/', requireAuth, async (req, res) => {
   const userId = req.user!.id
+  await db
+    .insert(users)
+    .values({ id: userId, email: req.user!.email ?? '' })
+    .onConflictDoNothing()
   const parsed = createFavoriteSchema.safeParse(req.body)
   if (!parsed.success) {
     res.status(400).json({ error: 'invalid_body', details: parsed.error.flatten() })

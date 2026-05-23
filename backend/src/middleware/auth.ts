@@ -1,9 +1,12 @@
 import type { NextFunction, Request, Response } from 'express'
 import type { JWTVerifyGetKey } from 'jose'
+import { and, eq, isNull } from 'drizzle-orm'
 import { createRemoteJWKSet, jwtVerify } from 'jose'
+import { db } from '../db/client.js'
+import { users } from '../db/schema.js'
 import { env } from '../env.js'
 
-let _jwks: JWTVerifyGetKey = createRemoteJWKSet(new URL(`${env.SUPABASE_URL}/auth/v1/keys`))
+let _jwks: JWTVerifyGetKey = createRemoteJWKSet(new URL(`${env.SUPABASE_URL}/auth/v1/.well-known/jwks.json`))
 
 export function _setJWKSForTesting(jwks: JWTVerifyGetKey) {
   _jwks = jwks
@@ -43,4 +46,25 @@ export async function requireAuth(
   } catch {
     res.status(401).json({ error: 'invalid_token' })
   }
+}
+
+export async function requireAdmin(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  if (!req.user?.id) {
+    res.status(401).json({ error: 'missing_bearer_token' })
+    return
+  }
+  const [row] = await db
+    .select({ role: users.role })
+    .from(users)
+    .where(and(eq(users.id, req.user.id), isNull(users.deletedAt)))
+    .limit(1)
+  if (!row || row.role !== 'admin') {
+    res.status(403).json({ error: 'forbidden' })
+    return
+  }
+  next()
 }

@@ -1,0 +1,105 @@
+{
+  "light": {
+    "background": "#f6f5f4",
+    "foreground": "#161614",
+
+    "primary": "#d10001",
+    "primaryForeground": "#f6f5f4",
+
+    "secondary": "#434340",
+    "secondaryForeground": "#f6f5f4",
+
+    "accent": "#f4f1ef",
+    "accentForeground": "#2b2b27",
+
+    "card": "#ffffff",
+    "cardForeground": "#161614",
+
+    "popover": "#ffffff",
+    "popoverForeground": "#161614",
+
+    "muted": "#f4f1ef",
+    "mutedForeground": "#a8a5a1",
+
+    "border": "#e9e5e0",
+    "input": "#c9c6c1",
+    "ring": "#776beb",
+
+    "destructive": "#ffd5c0",
+    "destructiveForeground": "#eb001f",
+
+    "chart": {
+      "1": "#b43310",
+      "2": "#00b59b",
+      "3": "#719d68",
+      "4": "oklch(0.828 0.189 84.429)",
+      "5": "oklch(0.769 0.188 70.08)"
+    },
+
+    "sidebar": {
+      "background": "#ffffff",
+      "foreground": "#161614",
+
+      "primary": "#2b2b27",
+      "primaryForeground": "#ffffff",
+
+      "accent": "#f4f1ef",
+      "accentForeground": "#2b2b27",
+
+      "border": "#e9e5e0",
+      "ring": "oklch(0.623 0.214 259.815)"
+    }
+  },
+
+  "dark": {
+    "background": "#1d1d1d",
+    "foreground": "#ffffff",
+
+    "primary": "#ff4b32",
+    "primaryForeground": "#ffffff",
+
+    "secondary": "#808080",
+    "secondaryForeground": "#ffffff",
+
+    "accent": "#404040",
+    "accentForeground": "#ffffff",
+
+    "card": "#1d1d1d",
+    "cardForeground": "#ffffff",
+
+    "popover": "#1d1d1d",
+    "popoverForeground": "#ffffff",
+
+    "muted": "#333333",
+    "mutedForeground": "#808080",
+
+    "border": "#333333",
+    "input": "#1d1d1d",
+    "ring": "#ff4b32",
+
+    "destructive": "#d00000",
+    "destructiveForeground": "#ffffff",
+
+    "chart": {
+      "1": "#ff4b32",
+      "2": "#808080",
+      "3": "#545454",
+      "4": "#d00000",
+      "5": "#ffffff"
+    },
+
+    "sidebar": {
+      "background": "#1d1d1d",
+      "foreground": "#ffffff",
+
+      "primary": "#ff4b32",
+      "primaryForeground": "#ffffff",
+
+      "accent": "#404040",
+      "accentForeground": "#ffffff",
+
+      "border": "#333333",
+      "ring": "#ff4b32"
+    }
+  }
+}

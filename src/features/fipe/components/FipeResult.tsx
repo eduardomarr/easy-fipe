@@ -1,10 +1,15 @@
+import { Heart } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
 import type { FipePrice } from '@/types/fipe'
 
 interface Props {
   data: FipePrice
+  isFavorited?: boolean
+  onToggleFavorite?: () => void
 }
 
 const DETAIL_ROWS = [
@@ -16,7 +21,7 @@ const DETAIL_ROWS = [
   { label: 'Mes referencia', key: 'referenceMonth' },
 ] as const
 
-export function FipeResult({ data }: Props) {
+export function FipeResult({ data, isFavorited, onToggleFavorite }: Props) {
   return (
     <Card className="overflow-hidden border-border/50 shadow-lg shadow-primary/5">
       <div className="px-6 pt-6 pb-5">
@@ -29,9 +34,30 @@ export function FipeResult({ data }: Props) {
               {data.brand} {data.model}
             </p>
           </div>
-          <Badge variant="outline" className="shrink-0 text-[10px] border-border/60">
-            {data.fuelAcronym}
-          </Badge>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <Badge variant="outline" className="text-[10px] border-border/60">
+              {data.fuelAcronym}
+            </Badge>
+            {onToggleFavorite !== undefined && (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={onToggleFavorite}
+                aria-label={isFavorited ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                className={cn(
+                  'size-7 transition-colors',
+                  isFavorited
+                    ? 'text-primary hover:text-primary/80'
+                    : 'text-muted-foreground hover:text-primary',
+                )}
+              >
+                <Heart
+                  className="size-4"
+                  fill={isFavorited ? 'currentColor' : 'none'}
+                />
+              </Button>
+            )}
+          </div>
         </div>
         <p className="text-4xl font-sans font-black text-primary mt-4 tracking-tight leading-none">
           {data.price}
